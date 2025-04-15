@@ -1,0 +1,14 @@
+#Este archivo solo lo usas para produccinn. Aqui defines las variables seguras
+#y quitas los volumenes
+#Aqui no se usa el override. Se usa .env solo para secretos como contrasenas.
+services:
+  users-microservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      #Le dice a ASP.NET Core en qué puerto escuchar dentro del contenedor, y debe coincidir
+      #con lo que expones en ports
+      - ASPNETCORE_URLS=http://+:5001
+      - ConnectionStrings__PostgresConnection=Host=postgres-container;Port=5432;Database=eCommerceUsers;Username=postgres
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5001:5001"

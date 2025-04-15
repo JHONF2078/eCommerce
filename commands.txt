@@ -1,0 +1,24 @@
+# modo desarrollo cambiar
+(.env) ASPNETCORE_ENVIRONMENT=Development
+(ejecutar) docker-compose up --build
+
+#modo debug cambiar
+(.env) ASPNETCORE_ENVIRONMENT=Development
+(.env)  DOTNET_CONFIGURATION=Debug
+(ejecutar) docker-compose up --build
+(vs) debug/Attach to Process ../UsersService.API
+
+#modo produccion cambiar
+(.env)  ASPNETCORE_ENVIRONMENT=Production
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+
+
+Corre el contenedor desde docker-compose -f docker-compose.override.yml up.
+
+Abre Visual Studio.
+
+Ve a Debug > Attach to Process.
+
+Selecciona "Connection Type: Docker".
+
+Conéctate al proceso en el contenedor usersservice.api.

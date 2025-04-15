@@ -1,0 +1,23 @@
+{
+    "folders": [
+		{
+		  "name": "Root (Infra & Docker)",
+		  "path": "."
+		},
+        {
+            "name": "UsersService",
+            "path": "src/UsersService"
+        },
+        {
+            "name": "OrdersService",
+            "path": "src/OrdersService"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "**/bin": true,
+            "**/obj": true
+        },
+        "terminal.integrated.defaultProfile.windows": "Git Bash"
+    }
+}

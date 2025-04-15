@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to UsersService",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "pipeTransport": {
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "users-microservice"
+                ],
+                "debuggerPath": "/vsdbg/vsdbg"
+            },
+            "sourceFileMap": {
+                "/app": "${workspaceFolder}/src/UsersService"
+            }
+        }
+    ]
+}

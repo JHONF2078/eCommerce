@@ -1,0 +1,19 @@
+#Este archivo solo se usa en desarrollo. Docker lo aplica automaticamente
+#cuando haces docker-compose up
+services:
+  users-microservice:
+    build:
+      context: ./src/UsersService
+      dockerfile: UsersService.API/Dockerfile.dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
+      - ConnectionStrings__DefaultConnection=Host=postgres-container;Port=5432;Username=postgres;Database=eCommerceUsers
+    volumes:
+    #Eso significa que todo el contenido de src/UsersService de tu máquina host
+    #se monta dentro del contenedor en /app
+      - ./src/UsersService:/src/UsersService
+    ports:
+      - "5001:5001"

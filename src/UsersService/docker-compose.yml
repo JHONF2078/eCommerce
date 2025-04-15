@@ -1,0 +1,6 @@
+services:
+  usersservice.api:
+    image: ${DOCKER_REGISTRY-}usersserviceapi
+    build:
+      context: .
+      dockerfile: UsersService.API/Dockerfile

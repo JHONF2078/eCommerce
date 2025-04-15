@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build UsersService",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/src/UsersService/UsersService.API/UsersService.API.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
