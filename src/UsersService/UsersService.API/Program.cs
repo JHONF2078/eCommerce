@@ -35,6 +35,24 @@ builder.Services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
 //FluentValidations
 builder.Services.AddFluentValidationAutoValidation();
 
+//Ad  API explorer services
+builder.Services.AddEndpointsApiExplorer();
+
+//Add swagger generation services to create swagger specification
+builder.Services.AddSwaggerGen();
+
+//Add cors services
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDevClient",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:4200", "https://localhost:4200") // Replace with your Angular app URL
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
 //Build the web application
 var app = builder.Build();
 
@@ -53,10 +71,17 @@ app.UseExceptionHandlingMiddleware();
 
 //Routing
 app.UseRouting();
+//add endpoints that can serve the swager.sjon
+app.UseSwagger();
+//add swager UI (interactive pago to explore and test API endpoints)
+app.UseSwaggerUI();
 
 //Auth
 app.UseAuthentication();
 app.UseAuthorization();
+
+//CORS
+app.UseCors("AllowAngularDevClient");
 
 //Controller routes
 app.MapControllers();

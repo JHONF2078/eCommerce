@@ -5,12 +5,14 @@ services:
     build:
       context: ./src/UsersService
       dockerfile: UsersService.API/Dockerfile
-    ports:
-      - "5001:5001"
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
       - DB_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
       - ConnectionStrings__DefaultConnection=Host=postgres-container;Port=5432;Username=postgres;Database=eCommerceUsers
+    ports:
+      - "5001:5001"
+    networks:
+      - ecommerce-network
     depends_on:
       - postgres-container
 
@@ -26,6 +28,40 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d/
+    networks:
+      - ecommerce-network
+
+  products-microservice:
+    container_name: products-microservice
+    build:
+      context: ./src/ProductsService
+      dockerfile: ProductsService.API/Dockerfile
+    environment:
+      MYSQL_HOST: mysql-host-productsmicroservice
+      MYSQL_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    networks:
+      - ecommerce-network
+
+  mysql-container:
+    container_name: mysql-container
+    image: mysql:8.3.0
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - ecommerce-network
+    hostname: mysql-host-productsmicroservice
 
 volumes:
   pgdata:
+  mysqldata:
+
+networks:
+  ecommerce-network:
+    driver: bridge

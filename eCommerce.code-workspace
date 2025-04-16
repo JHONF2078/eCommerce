@@ -1,12 +1,16 @@
 {
     "folders": [
-		{
-		  "name": "Root (Infra & Docker)",
-		  "path": "."
-		},
+        {
+            "name": "Root (Infra & Docker)",
+            "path": "."
+        },
         {
             "name": "UsersService",
             "path": "src/UsersService"
+        },
+        {
+            "name": "ProductsService",
+            "path": "src/ProductsService"
         },
         {
             "name": "OrdersService",
