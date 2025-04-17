@@ -8,7 +8,18 @@ services:
       #Le dice a ASP.NET Core en qué puerto escuchar dentro del contenedor, y debe coincidir
       #con lo que expones en ports
       - ASPNETCORE_URLS=http://+:5001
-      - ConnectionStrings__PostgresConnection=Host=postgres-container;Port=5432;Database=eCommerceUsers;Username=postgres
+      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
       - DB_PASSWORD=${DB_PASSWORD}
     ports:
       - "5001:5001"
+
+  products-microservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      #Le dice a ASP.NET Core en qué puerto escuchar dentro del contenedor, y debe coincidir
+      #con lo que expones en ports
+      - ASPNETCORE_URLS=http://+:9091
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-MyStrongPassword}
+    ports:
+      - "9091:9091"

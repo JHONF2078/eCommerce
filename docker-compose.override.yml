@@ -10,10 +10,26 @@ services:
       - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - DB_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
-      - ConnectionStrings__DefaultConnection=Host=postgres-container;Port=5432;Username=postgres;Database=eCommerceUsers
+      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
     volumes:
     #Eso significa que todo el contenido de src/UsersService de tu máquina host
     #se monta dentro del contenedor en /app
       - ./src/UsersService:/src/UsersService
     ports:
       - "5001:5001"
+
+  products-microservice:
+    build:
+      context: ./src/ProductsService
+      dockerfile: ProductsService.API/Dockerfile.dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-MyStrongPassword}
+    volumes:
+    #Eso significa que todo el contenido de src/ProductsService de tu máquina host
+    #se monta dentro del contenedor en /app
+      - ./src/ProductsService:/src/ProductsService
+    ports:
+      - "9091:9091"

@@ -6,11 +6,12 @@ services:
       context: ./src/UsersService
       dockerfile: UsersService.API/Dockerfile
     environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - POSTGRES_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
       - DB_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
-      - ConnectionStrings__DefaultConnection=Host=postgres-container;Port=5432;Username=postgres;Database=eCommerceUsers
+      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
     ports:
-      - "5001:5001"
+      - "${USERSERVICE_PORT}:${USERSERVICE_PORT}"
     networks:
       - ecommerce-network
     depends_on:
@@ -37,10 +38,11 @@ services:
       context: ./src/ProductsService
       dockerfile: ProductsService.API/Dockerfile
     environment:
-      MYSQL_HOST: mysql-host-productsmicroservice
-      MYSQL_PASSWORD: admin
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      ASPNETCORE_URLS: http://+:9091
     ports:
-      - "8080:8080"
+      - "${PRODUCTSERVICE_PORT}:${PRODUCTSERVICE_PORT}"
     networks:
       - ecommerce-network
 
@@ -48,7 +50,7 @@ services:
     container_name: mysql-container
     image: mysql:8.3.0
     environment:
-      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-MyStrongPassword}
     ports:
       - "3306:3306"
     volumes:
