@@ -6,6 +6,7 @@ using ProductsService.BusinessLogicLayer.ServiceContracts;
 using ProductsService.BusinessLogicLayer.Services;
 using ProductsService.BusinessLogicLayer.DTO;
 using ProductsService.DataAccessLayer.Entities;
+using System.Security.Cryptography;
 
 namespace ProductsService.BusinessLogicLayer
 {
@@ -25,8 +26,8 @@ namespace ProductsService.BusinessLogicLayer
             //services.AddScoped(typeof(IGenericService<,,,>), typeof(GenericService<,,,>));
 
             services.AddScoped<
-            IGenericService<Product, ProductResponse, ProductAddRequest, ProductUpdateRequest>,
-            GenericService<Product, ProductResponse, ProductAddRequest, ProductUpdateRequest>>();
+            IGenericService<Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest>,
+            GenericService<Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest>>();
 
             return services;
         }

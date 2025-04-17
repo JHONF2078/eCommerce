@@ -23,7 +23,7 @@ namespace ProductsService.DataAccessLayer
                 options.UseMySQL(configuration.GetConnectionString("DefaultConnection")!);
             });
 
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 
             return services;
         }

@@ -1,4 +1,4 @@
-﻿using DataAccessLayer.Repositories;
+﻿using ProductsService.BusinessLogicLayer.ServiceContracts;
 
 namespace ProductsService.BusinessLogicLayer.DTO
 {
@@ -8,7 +8,7 @@ namespace ProductsService.BusinessLogicLayer.DTO
         CategoryOptions Category,
         double? UnitPrice, 
         int? QuantityInStock
-       ) : IRequestWithId
+       ) : IRequestWithId<Guid>
     {
         public Guid Id => ProductID;
         public ProductUpdateRequest() : this(default, default, default, default, default)

@@ -29,7 +29,9 @@ namespace ProductsService.DataAccessLayer.Context
         {
             base.OnModelCreating(modelBuilder);
 
-
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Id)            // ← propiedad en el modelo
+                .HasColumnName("ProductID");
         }
     }
 }

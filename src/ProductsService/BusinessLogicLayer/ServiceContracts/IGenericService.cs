@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ProductsService.BusinessLogicLayer.ServiceContracts
 {
-    public interface IGenericService<TEntity, TResponse, TRequestAdd, TRequestUpdate>
+    public interface IGenericService<TEntity, TId, TResponse, TRequestAdd, TRequestUpdate>
     {
         /// <summary>
         /// retrieves the list of entities from the entities repository
@@ -50,6 +50,6 @@ namespace ProductsService.BusinessLogicLayer.ServiceContracts
         /// </summary>
         /// <param name="id">entity id to searc and delete</param>
         /// <returns>Returns true if the deletion is sucessful; utherwise false</returns>
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(TId id);
     }
 }

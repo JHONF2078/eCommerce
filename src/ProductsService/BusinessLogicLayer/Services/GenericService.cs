@@ -1,37 +1,32 @@
 ﻿using AutoMapper;
-using DataAccessLayer.Repositories;
 using FluentValidation;
 using FluentValidation.Results;
-using Org.BouncyCastle.Asn1.Cms;
-using ProductsService.BusinessLogicLayer.DTO;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Pqc.Crypto.Lms;
 using ProductsService.BusinessLogicLayer.ServiceContracts;
-using ProductsService.BusinessLogicLayer.Validators;
 using ProductsService.DataAccessLayer.Entities;
-using ProductsService.DataAccessLayer.Repositories;
 using ProductsService.DataAccessLayer.RepositoryContracts;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.Intrinsics.X86;
 
 namespace ProductsService.BusinessLogicLayer.Services
 {
-    public class GenericService<TEntity, TResponse, TRequestAdd, TRequestUpdate> : IGenericService<TEntity, TResponse, TRequestAdd, TRequestUpdate>
-          where TEntity : class
-          where TRequestUpdate : class, IRequestWithId
+    public class GenericService<TEntity, TId, TResponse, TRequestAdd, TRequestUpdate> : IGenericService<TEntity, TId, TResponse, TRequestAdd, TRequestUpdate>
+          where TEntity : BaseEntity<TId>
+          where TRequestUpdate : IRequestWithId<TId>
     {        
         private readonly IValidator<TRequestAdd> _genericRequestAddValidator;
         private readonly IValidator<TRequestUpdate> _genericRequestUpdateValidator;
         private readonly IMapper _mapper;
-        private readonly IGenericRepository<TEntity> _genericRepository;
+        private readonly IGenericRepository<TEntity, TId> _genericRepository;
 
         public GenericService(
             IValidator<TRequestAdd> genericRequestAddValidator,
             IValidator<TRequestUpdate> genericRequestUpdateValidator,
             IMapper mapper,
-            IGenericRepository<TEntity> genericRepository
+            IGenericRepository<TEntity, TId> genericRepository
             )
         {
             _genericRequestAddValidator = genericRequestAddValidator;
@@ -72,17 +67,15 @@ namespace ProductsService.BusinessLogicLayer.Services
             return entityAddedRResponse;
         }
 
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(TId id)
         {
-           TEntity? existingEntity = await _genericRepository.GetSingleByConditionAsync(x => x.Equals(id));
-
-            if(existingEntity == null)
-            {
-                return false;
-            }
+            // 2.  Buscar la entidad (FindAsync → GetByIdAsync)
+            TEntity? existing = await _genericRepository.GetByIdAsync(id);
+            if (existing is null)
+                throw new ArgumentException("Invalid entity ID");
 
             //attempt to delete entity
-           bool isDeleted = await _genericRepository.DeleteAsync(id);
+            bool isDeleted = await _genericRepository.DeleteAsync(id);
 
             return isDeleted;
         }
@@ -122,13 +115,16 @@ namespace ProductsService.BusinessLogicLayer.Services
 
         public async Task<TResponse> UpdateAsync(TRequestUpdate entityRequest)
         {
-            TEntity? existingProduct = await _genericRepository.GetByIdAsync(entityRequest.Id);
+            // 1.  Obtener el ID con el tipo correcto
+            TId id = entityRequest.Id;
 
-            if (existingProduct == null)
+            //Verificar que la entidad exista (usa la caché con FindAsync)
+            TEntity? existingEntity = await _genericRepository.GetByIdAsync(id);
+
+            if (existingEntity == null)
             {
                 throw new ArgumentException("Invalid Product ID");
             }
-
 
             //Validate the product using Fluent Validation
             ValidationResult validationResult = await _genericRequestUpdateValidator.ValidateAsync(entityRequest);
@@ -141,10 +137,21 @@ namespace ProductsService.BusinessLogicLayer.Services
             }
 
 
-            //Map from ProductUpdateRequest to Product type
-            TEntity product = _mapper.Map<TEntity>(entityRequest); //Invokes ProductUpdateRequestToProductMappingProfile
+            //usa la sobrecarga Map<TDestination>(source), que:
+            //1.Crea una instancia nueva de TEntity.
+            // 2.Copia las propiedades del DTO en esa instancia.
+            //Si luego intentas adjuntar ese objeto al DbContext mientras ya existe otra instancia con la
+            //misma PK(la que recuperaste con GetByIdAsync), EF Core lanza la excepción de tracking duplicado.
+            //la otra opcion seria no verificar que existe antes de mapear, es decir no hacer nada de existingEntity
+            //TEntity entity = _mapper.Map<TEntity>(entityRequest);
 
-            TEntity? updatedProduct = await _genericRepository.UpdateAsync(product);
+
+            //Map from ProductUpdateRequest to Product entity
+            //Invokes ProductUpdateRequestToProductMappingProfile
+            // ← NO se crea una entidad nueva
+            TEntity entity =  _mapper.Map(entityRequest, existingEntity); 
+
+            TEntity? updatedProduct = await _genericRepository.UpdateAsync(entity);
 
             TResponse? updatedEntityResponse = _mapper.Map<TResponse>(updatedProduct);
 

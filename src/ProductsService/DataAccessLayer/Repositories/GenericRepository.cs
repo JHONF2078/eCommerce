@@ -10,8 +10,8 @@ namespace ProductsService.DataAccessLayer.Repositories
     /// <summary>
     /// Generic repository for CRUD operations on entities of type T.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    /// <typeparam name="TTEntity"></typeparam>
+    public class GenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId> where TEntity : BaseEntity<TId>
     {
         private readonly ApplicationDbContext _dbContext;
         public GenericRepository(ApplicationDbContext dbContext)
@@ -24,12 +24,12 @@ namespace ProductsService.DataAccessLayer.Repositories
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public async Task<T> AddAsync(T entity)
+        public async Task<TEntity> AddAsync(TEntity entity)
         {
             // _dbContext.Set<T>() Dame el DbSet correspondiente al tipo T, es como decir _dbContext.Products
             //.Add(entity) marca la entidad como “para insertar” en el contexto.
             //Aún no se guarda en la base de datos. Solo se registra el cambio en memoria.
-            _dbContext.Set<T>().Add(entity);
+            _dbContext.Set<TEntity>().Add(entity);
             //se ejecuta el INSERT en la base de datos
             //Revisa todos los cambios hechos en el contexto (Add, Update, Remove) y los sincroniza con la base de datos.
             await _dbContext.SaveChangesAsync();
@@ -41,43 +41,60 @@ namespace ProductsService.DataAccessLayer.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(TId id)
         {
-            var existingEntity = await SearchAsync(id);
+            //TEntity? existingEntity = await _dbContext.Set<TEntity>().FirstOrDefaultAsync(x => x.Id.Equals(id));
+            TEntity? existingEntity = await GetByIdAsync(id);
 
             if (existingEntity == null)
             {
                 return false;
             }
 
-            _dbContext.Set<T>().Remove(existingEntity);
+            _dbContext.Set<TEntity>().Remove(existingEntity);
             int affectedRowsCount = await _dbContext.SaveChangesAsync();
 
             return affectedRowsCount > 0;
         }
 
         /// <summary>
-        /// Get a product by condition asynchronously from the database.
+        /// Get a single entity that matches the given condition.  
+        /// Úsalo para filtros distintos a la PK o cuando necesites Includes.
         /// </summary>
-        /// <param name="conditionExpression"></param>
-        /// <returns></returns>
-        public async Task<T?> GetSingleByConditionAsync(Expression<Func<T, bool>> conditionExpression)
+        public async Task<TEntity?> GetSingleByConditionAsync(
+                Expression<Func<TEntity, bool>> conditionExpression,
+                bool asNoTracking = true)
         {
-            var entity = await _dbContext.Set<T>().FirstOrDefaultAsync(conditionExpression);
-            return entity;
+            //LINQ a EF Core
+            //Es una extensión LINQ
+            //para llamar este metodo GetSingleByConditionAsync, tener las recomendaciones de este comentaria, la llamada se haria asi:
+            //TEntity? existingEntity = await _dbContext.Set<TEntity>().FirstOrDefaultAsync(x => x.Id.Equals(entity.Id));
+            //Si el método recibe una expresión (x => …) es LINQ.
+            //Queryable<T>; acepta una expresión(Expression<Func<T, bool>>).El proveedor EF Core traduce la expresión a SQL.
+            //cuando usar Necesitas Include o proyección (Select) junto con la búsqueda.
+            //El filtro no es la PK sino otra columna (por ejemplo, Email, Slug, etc.).
+            //Trabajas en consultas compuestas (ordenamientos, paginación, etc.).
+
+            IQueryable<TEntity> query = _dbContext.Set<TEntity>();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();   // evita sobrecarga del Change Tracker en lecturas
+
+           
+            return await query.FirstOrDefaultAsync(conditionExpression);
         }
 
         /// <summary>
         /// Get all products  asynchronously from the database.
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            var entities = await _dbContext.Set<T>().ToListAsync();
+            var entities = await _dbContext.Set<TEntity>().ToListAsync();
             return entities;
         }
 
-        public Task<List<T>> GetAllAsync2()
+        public Task<List<TEntity>> GetAllAsync2()
         {
             throw new NotImplementedException();
         }
@@ -87,58 +104,19 @@ namespace ProductsService.DataAccessLayer.Repositories
         /// </summary>
         /// <param name="conditionExpression"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> GetAllByConditionsAsync(Expression<Func<T, bool>> conditionExpression)
+        public async Task<IEnumerable<TEntity>> GetAllByConditionsAsync(Expression<Func<TEntity, bool>> conditionExpression)
         {
-            var entities = await _dbContext.Set<T>().Where(conditionExpression).ToListAsync();
+            var entities = await _dbContext.Set<TEntity>().Where(conditionExpression).ToListAsync();
             return entities;
         }
+       
 
-        //usamos T? (nullable genérico) para que el compilador sepa que puede ser null
-        /// <summary>
-        /// Search for a product by ID asynchronously in the database.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        private async Task<T?> SearchAsync(Guid id)
+        public async Task<TEntity?> UpdateAsync(TEntity entity)
         {
-            // Obtenemos el nombre de la clave primaria usando los metadatos del modelo de EF Core
-            var entityType = _dbContext.Model.FindEntityType(typeof(T));
-            var pkProperty = entityType?.FindPrimaryKey()?.Properties.FirstOrDefault();
+            //SE PODDRIA USAR PERO ES MAS RECOMENDADO GetByIdAsync, por el tema de la caché
+            //TEntity? existingEntity = await _dbContext.Set<TEntity>().FirstOrDefaultAsync(x => x.Id.Equals(entity.Id));
 
-            if (pkProperty == null)
-                throw new InvalidOperationException($"No se pudo encontrar la clave primaria de la entidad {typeof(T).Name}");
-
-            var pkName = pkProperty.Name;
-
-            // Usamos EF.Property para construir dinámicamente la condición de búsqueda
-            var entity = await _dbContext.Set<T>().FirstOrDefaultAsync(e =>
-                EF.Property<Guid>(e, pkName).Equals(id));
-
-            return entity;
-        }
-
-        public async Task<T?> UpdateAsync(T entity)
-        {
-            // Obtenemos el nombre de la clave primaria
-            var entityType = _dbContext.Model.FindEntityType(typeof(T));
-            var pkProperty = entityType?.FindPrimaryKey()?.Properties.FirstOrDefault();
-
-            if (pkProperty == null)
-                throw new InvalidOperationException($"No se pudo encontrar la clave primaria de la entidad {typeof(T).Name}");
-
-            var pkName = pkProperty.Name;
-            var propertyInfo = typeof(T).GetProperty(pkName);
-
-            if (propertyInfo == null)
-                throw new InvalidOperationException($"La propiedad {pkName} no existe en {typeof(T).Name}");
-
-            // Obtenemos el valor de la clave primaria desde la entidad pasada
-            var idValue = propertyInfo.GetValue(entity);
-            if (idValue == null)
-                throw new InvalidOperationException("El valor de la clave primaria no puede ser null");
-
-            // Buscamos la entidad original en la base de datos
-            var existingEntity = await SearchAsync((Guid)idValue);
+            TEntity? existingEntity = await GetByIdAsync(entity.Id);
 
             if (existingEntity == null)
             {
@@ -147,27 +125,31 @@ namespace ProductsService.DataAccessLayer.Repositories
 
             //asi como esta modifica todas las propiedades
             //Si entity no tiene todos los datos completos (por ejemplo, viene de un formulario parcial),
-            //podrías terminar sobreescribiendo con valores por defecto (null, 0, etc.).
+            //podrías terminar sobreescribiendo con valores por defecto (null, 0, etc.).           
             _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
+
 
             await _dbContext.SaveChangesAsync();
 
             return existingEntity;
         }
 
-        public async Task<T?> GetByIdAsync(object id)
+
+        /// <summary>
+        /// Get an entity by its primary key asynchronously (usa la caché del Change Tracker).
+        /// </summary>
+        public async Task<TEntity?> GetByIdAsync(TId id)
         {
-            var entityType = _dbContext.Model.FindEntityType(typeof(T));
-            var pkProperty = entityType?.FindPrimaryKey()?.Properties.FirstOrDefault();
-
-            if (pkProperty == null)
-                throw new InvalidOperationException($"No se pudo encontrar la clave primaria de la entidad {typeof(T).Name}");
-
-            var pkName = pkProperty.Name;
-
-            // Construye una consulta dinámica usando EF.Property
-            return await _dbContext.Set<T>().FirstOrDefaultAsync(e =>
-                EF.Property<object>(e, pkName).Equals(id));
+            //No es linq. 
+            //Si recibe valores concretos de clave y no usa expresión, no es LINQ; es un helper de EF Core.
+            //Es un método propio de DbSet (no acepta expresión). Se especializa en recuperar por clave primaria.
+            //FindAsync localiza la entidad por la clave primaria configurada en el modelo, sin que tengas que
+            //saber cómo se llama la columna en la base de datos.
+            //Si la entidad ya está siendo rastreada, FindAsync la devuelve de la caché y no dispara consulta SQL;
+            //de lo contrario ejecuta un SELECT … WHERE[PK] = @id.
+            //Si ya tienes el valor de la clave primaria y solo necesitas esa fila, usa FindAsync
+            // Si la entidad ya está siendo rastreada, FindAsync la devuelve de caché
+            return await _dbContext.Set<TEntity>().FindAsync(id);
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿using ProductsService.BusinessLogicLayer.DTO;
-using ProductsService.BusinessLogicLayer.ServiceContracts;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.Results;
+using ProductsService.BusinessLogicLayer.DTO;
+using ProductsService.BusinessLogicLayer.ServiceContracts;
 using ProductsService.DataAccessLayer.Entities;
-using BusinessLogicLayer.ServiceContracts;
-using ProductsService.BusinessLogicLayer.Services;
 
 namespace ProductsService.API.APIEndpoints;
 
@@ -13,7 +11,7 @@ public static class ProductAPIEndpoints
   public static IEndpointRouteBuilder MapProductAPIEndpoints(this IEndpointRouteBuilder app)
   {
     //GET /api/products
-    app.MapGet("/api/products", async (IGenericService< Product, ProductResponse, ProductAddRequest, ProductUpdateRequest > productsService) =>
+    app.MapGet("/api/products", async (IGenericService< Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest > productsService) =>
     {
       List<ProductResponse?> products = await productsService.GetAllAsync();
       return Results.Ok(products);
@@ -21,15 +19,15 @@ public static class ProductAPIEndpoints
 
 
         //GET /api/products/search/product-id/00000000-0000-0000-0000-000000000000
-    app.MapGet("/api/products/search/product-id/{ProductID:guid}", async (IGenericService < Product, ProductResponse, ProductAddRequest, ProductUpdateRequest >  productsService, Guid ProductID) =>
+    app.MapGet("/api/products/search/product-id/{ProductID:guid}", async (IGenericService < Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest >  productsService, Guid ProductID) =>
     {
-      ProductResponse? product = await productsService.GetSingleByCondition(temp => temp.ProductID == ProductID);
+      ProductResponse? product = await productsService.GetSingleByCondition(temp => temp.Id == ProductID);
       return Results.Ok(product);
     });
 
 
     //GET /api/products/search/xxxxxxxxxxxxxxxxxx
-    app.MapGet("/api/products/search/{SearchString}", async (IGenericService<Product, ProductResponse, ProductAddRequest, ProductUpdateRequest> productsService, string SearchString) =>
+    app.MapGet("/api/products/search/{SearchString}", async (IGenericService<Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest> productsService, string SearchString) =>
     {
       List<ProductResponse?> productsByProductName = await productsService.GetAllByCondition(temp => temp.ProductName != null && temp.ProductName.Contains(SearchString, StringComparison.OrdinalIgnoreCase));
 
@@ -42,7 +40,7 @@ public static class ProductAPIEndpoints
 
 
     //POST /api/products
-    app.MapPost("/api/products", async (IGenericService<Product, ProductResponse, ProductAddRequest, ProductUpdateRequest> productsService, IValidator<ProductAddRequest> productAddRequestValidator, ProductAddRequest productAddRequest) =>
+    app.MapPost("/api/products", async (IGenericService<Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest> productsService, IValidator<ProductAddRequest> productAddRequestValidator, ProductAddRequest productAddRequest) =>
     {
       //Validate the ProductAddRequest object using Fluent Validation
       ValidationResult validationResult = await productAddRequestValidator.ValidateAsync(productAddRequest);
@@ -67,7 +65,7 @@ public static class ProductAPIEndpoints
 
 
     //PUT /api/products
-    app.MapPut("/api/products", async (IGenericService<Product, ProductResponse, ProductAddRequest, ProductUpdateRequest> productsService, IValidator<ProductUpdateRequest> productUpdateRequestValidator, ProductUpdateRequest productUpdateRequest) =>
+    app.MapPut("/api/products", async (IGenericService<Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest> productsService, IValidator<ProductUpdateRequest> productUpdateRequestValidator, ProductUpdateRequest productUpdateRequest) =>
     {
       //Validate the ProductUpdateRequest object using Fluent Validation
       ValidationResult validationResult = await productUpdateRequestValidator.ValidateAsync(productUpdateRequest);
@@ -92,7 +90,7 @@ public static class ProductAPIEndpoints
 
 
     //DELETE /api/products/xxxxxxxxxxxxxxxxxxx
-    app.MapDelete("/api/products/{ProductID:guid}", async (IGenericService<Product, ProductResponse, ProductAddRequest, ProductUpdateRequest> productsService, Guid ProductID) =>
+    app.MapDelete("/api/products/{ProductID:guid}", async (IGenericService<Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest> productsService, Guid ProductID) =>
     {
       bool isDeleted = await productsService.DeleteAsync(ProductID);
       if (isDeleted)
