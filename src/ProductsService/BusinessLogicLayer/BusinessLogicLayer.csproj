@@ -16,4 +16,9 @@
     <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Mappers\" />
+    <Folder Include="Validators\" />
+  </ItemGroup>
+
 </Project>

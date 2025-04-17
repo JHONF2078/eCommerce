@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
+using ProductsService.BusinessLogicLayer.Mappers;
+using ProductsService.BusinessLogicLayer.Validators;
+using ProductsService.BusinessLogicLayer.ServiceContracts;
+using ProductsService.BusinessLogicLayer.Services;
+using ProductsService.BusinessLogicLayer.DTO;
+using ProductsService.DataAccessLayer.Entities;
 
 namespace ProductsService.BusinessLogicLayer
 {
@@ -12,6 +14,19 @@ namespace ProductsService.BusinessLogicLayer
         public static IServiceCollection AddBusinessLogicLayer(this IServiceCollection services)
         {
             //TO DO: Add Business Logic Layer services into the IoC container
+
+            //! Add AutoMapper to the IoC container
+            //! We are using the assembly of the ProductToProductResponseMappingProfile class to scan for all mapping profiles
+            //then AutoMapper will automatically register all profiles in the assembly
+            services.AddAutoMapper(typeof(ProductToProductResponseMappingProfile).Assembly);
+
+            services.AddValidatorsFromAssemblyContaining<ProductAddRequestValidator>();
+
+            //services.AddScoped(typeof(IGenericService<,,,>), typeof(GenericService<,,,>));
+
+            services.AddScoped<
+            IGenericService<Product, ProductResponse, ProductAddRequest, ProductUpdateRequest>,
+            GenericService<Product, ProductResponse, ProductAddRequest, ProductUpdateRequest>>();
 
             return services;
         }
