@@ -1,36 +1,36 @@
 
 services:
-  users-microservice:
-    container_name: users-microservice
+  orders-microservice:
+    container_name: orders-microservice
+    image: orders-microservice
     build:
-      context: ./src/UsersService
-      dockerfile: UsersService.API/Dockerfile
+      context: ./src/OrdersService
+      dockerfile: OrdersService.API/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
-      - DB_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
-      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
+      - MONGODB_HOST=${MONGODB_HOST}
+      - MONGODB_PORT=27017
+      - MONGODB_DATABASE=OrdersDatabase
+      - UsersMicroserviceName=users-microservice
+      - UsersMicroservicePort=5001
     ports:
-      - "${USERSERVICE_PORT}:${USERSERVICE_PORT}"
+      - "8081:8081"
     networks:
+      - orders-mongodb-network
       - ecommerce-network
     depends_on:
-      - postgres-container
+      - mongo-container
 
-  postgres-container:
-    container_name: postgres-container
-    image: postgres:16.1
+  mongo-container:
+    container_name: mongo-container
+    image: mongo:latest
     ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
-      - POSTGRES_DB=eCommerceUsers
+      - "27017:27017"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./postgres-init:/docker-entrypoint-initdb.d/
+      - ./mongodb-init:/docker-entrypoint-initdb.d
+      - mongodbdata:/data/db
     networks:
-      - ecommerce-network
+      - orders-mongodb-network
+
 
   products-microservice:
     container_name: products-microservice
@@ -40,11 +40,14 @@ services:
     environment:
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      ASPNETCORE_URLS: http://+:9091
     ports:
       - "${PRODUCTSERVICE_PORT}:${PRODUCTSERVICE_PORT}"
     networks:
+      - products-mysql-network
       - ecommerce-network
+    depends_on:
+      - mysql-container
+
 
   mysql-container:
     container_name: mysql-container
@@ -57,13 +60,57 @@ services:
       - mysqldata:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
     networks:
-      - ecommerce-network
+      - products-mysql-network
     hostname: mysql-host-productsmicroservice
+
+
+
+  users-microservice:
+    container_name: users-microservice
+    build:
+      context: ./src/UsersService
+      dockerfile: UsersService.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
+    ports:
+      - "${USERSERVICE_PORT}:${USERSERVICE_PORT}"
+    networks:
+      - users-postgres-network
+      - ecommerce-network
+    depends_on:
+      - postgres-container
+
+  postgres-container:
+    container_name: postgres-container
+    image: postgres:16.1
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      #- DB_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=eCommerceUsers
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d/
+    networks:
+      - ecommerce-network
+
 
 volumes:
   pgdata:
   mysqldata:
+  mongodbdata:
+
 
 networks:
+  orders-mongodb-network:
+    driver: bridge
+  products-mysql-network:
+    driver: bridge
+  users-postgres-network:
+    driver: bridge
   ecommerce-network:
     driver: bridge

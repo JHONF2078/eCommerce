@@ -1,25 +1,50 @@
 #Este archivo solo lo usas para produccinn. Aqui defines las variables seguras
 #y quitas los volumenes
 #Aqui no se usa el override. Se usa .env solo para secretos como contrasenas.
+#Aquí debes evitar montar volúmenes o exponer puertos innecesarios, y aplicar:
+#Variables de entorno seguras
+#Dockerfiles que generan builds optimizados
+#Eliminar cualquier configuración de desarrollo (como volumes, Dockerfile.dev, etc.)
+#Usar .env para mantener las credenciales seguras
+
 services:
+  orders-microservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      #Dónde deberías definir ASPNETCORE_URLS?
+      #Recomendado: solo en docker-compose.prod.yml
+      #En desarrollo, el entorno ya puede usar launchSettings.json o variables como ASPNETCORE_ENVIRONMENT, 
+      #o se puede controlar desde Dockerfile.dev.
+      #En producción es obligatorio para que el contenedor escuche correctamente en el puerto que expones con ports:.
+      #Opcional: definirla también en override (si no usas launchSettings.json)
+      #Solo si tu app NO escucha correctamente en desarrollo (por ejemplo, si ves que no responde en localhost:9091, etc.).
+      - ASPNETCORE_URLS=http://+:8081
+    ports:
+      - "8081:8081"
+
+
+  products-microservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      #Le dice a ASP.NET Core en qué puerto escuchar dentro del contenedor, y debe coincidir
+      #con lo que expones en ports
+      - ASPNETCORE_URLS=http://+:9091
+      # Solo deberías incluir MYSQL_HOST o MYSQL_PASSWORD si necesitas valores distintos al base
+      # que esta en docker-compose o si quieres que vengan del .env de producción. Si no cambian, no los pongas aquí.
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "9091:9091"
+
+
   users-microservice:
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       #Le dice a ASP.NET Core en qué puerto escuchar dentro del contenedor, y debe coincidir
       #con lo que expones en ports
       - ASPNETCORE_URLS=http://+:5001
       - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
-      - DB_PASSWORD=${DB_PASSWORD}
+      #- DB_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
       - "5001:5001"
-
-  products-microservice:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
-      #Le dice a ASP.NET Core en qué puerto escuchar dentro del contenedor, y debe coincidir
-      #con lo que expones en ports
-      - ASPNETCORE_URLS=http://+:9091
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-MyStrongPassword}
-    ports:
-      - "9091:9091"

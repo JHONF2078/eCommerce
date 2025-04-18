@@ -1,15 +1,52 @@
 #Este archivo solo se usa en desarrollo. Docker lo aplica automaticamente
 #cuando haces docker-compose up
+#Variables de entorno específicas para desarrollo
+#Montar volúmenes locales (por ejemplo: código fuente)
+#Usar un Dockerfile de desarrollo (Dockerfile.dev)
+#Exponer más puertos
+#Cambiar rutas o puertos internos
+
 services:
+  orders-microservice:
+    build:
+      context: ./src/OrdersService
+      dockerfile: OrdersService.API/Dockerfile.dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - ASPNETCORE_HTTP_PORTS=8081
+      - "8081"
+    volumes:
+      -  ./src/OrdersService:/src/OrdersService
+
+
+  products-microservice:
+    build:
+      context: ./src/ProductsService
+      dockerfile: ProductsService.API/Dockerfile.dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
+      # Solo deberías incluir MYSQL_HOST o MYSQL_PASSWORD si necesitas valores distintos al base
+      # que esta en docker-compose o si en desarrollo los sobreescribes. Si no cambian, no los pongas aquí.
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+    #Eso significa que todo el contenido de src/ProductsService de tu máquina host
+    #se monta dentro del contenedor en /app
+      - ./src/ProductsService:/src/ProductsService
+    ports:
+      - "9091:9091"
+
+
   users-microservice:
     build:
       context: ./src/UsersService
       dockerfile: UsersService.API/Dockerfile.dev
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
+      #- DB_PASSWORD=${DB_PASSWORD}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - DB_PASSWORD=${DB_PASSWORD:-MyStrongPassword}
       - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
     volumes:
     #Eso significa que todo el contenido de src/UsersService de tu máquina host
@@ -18,18 +55,3 @@ services:
     ports:
       - "5001:5001"
 
-  products-microservice:
-    build:
-      context: ./src/ProductsService
-      dockerfile: ProductsService.API/Dockerfile.dev
-    environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
-      - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-MyStrongPassword}
-    volumes:
-    #Eso significa que todo el contenido de src/ProductsService de tu máquina host
-    #se monta dentro del contenedor en /app
-      - ./src/ProductsService:/src/ProductsService
-    ports:
-      - "9091:9091"

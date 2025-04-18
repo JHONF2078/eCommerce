@@ -1,0 +1,10 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
+WORKDIR /src/OrdersService
+
+# Copia todos los proyectos (puedes usar patrones si lo prefieres)
+COPY . .
+
+WORKDIR /src/OrdersService/OrdersService.API
+# Usa el valor de la variable DOTNET_CONFIGURATION o "Debug" por defecto
+# Esto usa sh para poder interpolar la variable del entorno dentro del comando. Si no usas sh, las variables no se expanden dentro del ENTRYPOINT
+ENTRYPOINT ["sh", "-c", "dotnet watch run --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:8081"]
