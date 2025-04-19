@@ -1,9 +1,10 @@
-﻿using ProductsService.DataAccessLayer.Entities;
+﻿using ProductsService.DataAccessLayer.EntitiesContracts;
+using ProductsService.DataAccessLayer.Entities;
 using System.Linq.Expressions;
 
 namespace ProductsService.DataAccessLayer.RepositoryContracts
 {
-    public interface IGenericRepository<TEntity, TId> where TEntity : BaseEntity<TId>
+    public interface IGenericRepository<TEntity, TId> where TEntity : IEntity<TId>
 
     {
         /// <summary>

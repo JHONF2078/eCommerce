@@ -72,8 +72,8 @@ services:
       dockerfile: UsersService.API/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ConnectionStrings__PostgresConnection=${CONNECTIONSTRING_USERS}
     ports:
       - "${USERSERVICE_PORT}:${USERSERVICE_PORT}"
     networks:
@@ -88,10 +88,11 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      #- DB_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=eCommerceUsers
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d/

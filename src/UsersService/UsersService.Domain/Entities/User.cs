@@ -14,8 +14,12 @@ namespace UsersService.Domain.Entities
         public string? PersonName { get; set; }
         public string? Gender { get; set; }
 
-        public Guid GetId() => UserID;
-        public void SetId(Guid id) => UserID = id;
+        //Implementación real de la interfaz
+        public Guid Id
+        {
+            get => UserID;
+            set => UserID = value;
+        }
 
         public string GetTableName() => "Users";
     }

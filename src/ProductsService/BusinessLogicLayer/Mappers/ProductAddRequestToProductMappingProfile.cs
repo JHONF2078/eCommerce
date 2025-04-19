@@ -17,7 +17,7 @@ public class ProductAddRequestToProductMappingProfile : Profile
       //ProductID es la clave primaria que genera automaticamente la base de datos.
       //Al ignorarla, evitas que AutoMapper intente sobrescribirla con un valor nulo o
       //por defecto (lo cual podria causar errores)
-      .ForMember(dest => dest.ProductID, opt => opt.Ignore())
+      .ForMember(dest => dest.Id, opt => opt.Ignore())
       ;
   }
 }

@@ -31,5 +31,12 @@ namespace UsersService.Application.Interfaces.Services
         Task<AuthenticationResponse> Register(
             RegisterRequestCustom registerRequest
         );
+
+        /// <summary>
+        /// returns userdto object based on the given userid
+        /// </summary>
+        /// <param name="userId">userid to search</param>
+        /// <returns>return userdto object based in the matching  userid</returns>
+        Task<UserDTO> GetUserByUserID(Guid userId);
     }
 }

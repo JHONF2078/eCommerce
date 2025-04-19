@@ -11,24 +11,19 @@ namespace UsersService.Infrastructure.DbContext
         public DapperDbContext(IConfiguration configuration)
         {
             _configuration = configuration;
-            string? connectionString = _configuration.GetConnectionString("PostgresConnection");
-            // Obtener la contraseña desde variable de entorno
-            var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
 
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                throw new InvalidOperationException("La variable de entorno 'DB_PASSWORD' no está definida.");
-            }
+            // Obtener la datos de posgrest  desde variables de entorno (docker)
+            string connectionStringTemplate = _configuration.GetConnectionString("PostgresConnection")!;
+            string connectionString = connectionStringTemplate
+              .Replace("$POSTGRES_HOST", Environment.GetEnvironmentVariable("POSTGRES_HOST"))
+              .Replace("$POSTGRES_PASSWORD", Environment.GetEnvironmentVariable("POSTGRES_PASSWORD"))
+              .Replace("$POSTGRES_DATABASE", Environment.GetEnvironmentVariable("POSTGRES_DATABASE"))
+              .Replace("$POSTGRES_PORT", Environment.GetEnvironmentVariable("POSTGRES_PORT"))
+              .Replace("$POSTGRES_USER", Environment.GetEnvironmentVariable("POSTGRES_USER"));
+            
 
-            // Construir la cadena completa de forma segura
-            var connectionBuilder = new NpgsqlConnectionStringBuilder(connectionString)
-            {
-                Password = password
-            };
-
-
-            //create a new NpgsqlConnection with  the retrieved connection string
-            _connection = new NpgsqlConnection(connectionBuilder.ConnectionString);
+            //Create a new NpgsqlConnection with the retrieved connection string
+            _connection = new NpgsqlConnection(connectionString);
         }
 
         //get property with lambda expression

@@ -3,6 +3,7 @@ using ProductsService.DataAccessLayer.Context;
 using ProductsService.DataAccessLayer.Entities;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using ProductsService.DataAccessLayer.EntitiesContracts;
 
 namespace ProductsService.DataAccessLayer.Repositories
 {
@@ -11,7 +12,8 @@ namespace ProductsService.DataAccessLayer.Repositories
     /// Generic repository for CRUD operations on entities of type T.
     /// </summary>
     /// <typeparam name="TTEntity"></typeparam>
-    public class GenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId> where TEntity : BaseEntity<TId>
+    public class GenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId> 
+        where TEntity : class, IEntity<TId>
     {
         private readonly ApplicationDbContext _dbContext;
         public GenericRepository(ApplicationDbContext dbContext)

@@ -43,8 +43,7 @@ services:
       #Le dice a ASP.NET Core en qué puerto escuchar dentro del contenedor, y debe coincidir
       #con lo que expones en ports
       - ASPNETCORE_URLS=http://+:5001
-      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
-      #- DB_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - ConnectionStrings__PostgresConnection=${CONNECTIONSTRING_USERS}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5001:5001"

@@ -16,6 +16,15 @@ namespace UsersService.Application.Services
             _userRepository = userRepository;
             _mapper = mapper;
         }
+
+        public async  Task<UserDTO> GetUserByUserID(Guid userId)
+        {
+           User? user = await _userRepository.GetByIdAsync(userId);
+
+           return  _mapper.Map<UserDTO>(user);
+
+        }
+
         public async Task<AuthenticationResponse?> Login(LoginRequestCustom loginRequest)
         {
             User? user = await

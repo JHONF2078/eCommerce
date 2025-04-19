@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ProductsService.DataAccessLayer.EntitiesContracts;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ using System.Runtime.Intrinsics.X86;
 namespace ProductsService.BusinessLogicLayer.Services
 {
     public class GenericService<TEntity, TId, TResponse, TRequestAdd, TRequestUpdate> : IGenericService<TEntity, TId, TResponse, TRequestAdd, TRequestUpdate>
-          where TEntity : BaseEntity<TId>
+          where TEntity : class, IEntity<TId>
           where TRequestUpdate : IRequestWithId<TId>
     {        
         private readonly IValidator<TRequestAdd> _genericRequestAddValidator;

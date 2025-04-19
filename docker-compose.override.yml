@@ -45,9 +45,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
-      #- DB_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - ConnectionStrings__DefaultConnection=${CONNECTIONSTRING_USERS}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - ConnectionStrings__PostgresConnection=${CONNECTIONSTRING_USERS}
     volumes:
     #Eso significa que todo el contenido de src/UsersService de tu máquina host
     #se monta dentro del contenedor en /app

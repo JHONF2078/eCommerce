@@ -1,12 +1,12 @@
-﻿using ProductsService.DataAccessLayer.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Pqc.Crypto.Lms;
+using ProductsService.DataAccessLayer.Entities;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ProductsService.DataAccessLayer.Context
@@ -24,7 +24,7 @@ namespace ProductsService.DataAccessLayer.Context
         //para configurar detalles de las tablas(restricciones, relaciones, nombres personalizados, etc.).
         //Es un método de configuración fluida (Fluent API) que te da más control y flexibilidad que las data annotations.
         //FluentValidation.AspNetCore
-       // Es una librería independiente para validar datos de entrada, como formularios, peticiones HTTP, DTOs, etc.
+        // Es una librería independiente para validar datos de entrada, como formularios, peticiones HTTP, DTOs, etc.
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -10,5 +10,12 @@ namespace UsersService.Application.Interfaces.Repository
     public interface IGenericRepository<T> where T : class
     {
         Task<T?> AddAsync(T entity);
+
+        /// <summary>
+        /// return the users data based on the given user ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<T?> GetByIdAsync(Guid? id);
     }
 }

@@ -8,9 +8,7 @@ namespace UsersService.Domain.Entities
 {
     public interface IGenericEntity<TKey>
     {
-        TKey GetId();
-        void SetId(TKey id);
-
+        TKey Id { get; set; }
         string GetTableName();
     }
 }

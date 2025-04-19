@@ -26,7 +26,7 @@ public class ProductUpdateRequestToProductMappingProfile : Profile
             opt.MapFrom(src => src.UnitPrice);
         })
        .ForMember(dest => dest.QuantityInStock, opt => opt.MapFrom(src => src.QuantityInStock))
-       .ForMember(dest => dest.ProductID, opt => opt.MapFrom(src => src.ProductID));
+       .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ProductID));
 
         // ────────────────────────────────────────────── // ──────────────────────────────────────────────
         // Regla genérica: copiar solo miembros ≠ null
