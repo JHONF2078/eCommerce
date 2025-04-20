@@ -29,7 +29,7 @@ services:
       # Solo deberías incluir MYSQL_HOST o MYSQL_PASSWORD si necesitas valores distintos al base
       # que esta en docker-compose o si en desarrollo los sobreescribes. Si no cambian, no los pongas aquí.
       - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
     #Eso significa que todo el contenido de src/ProductsService de tu máquina host
     #se monta dentro del contenedor en /app

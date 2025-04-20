@@ -32,7 +32,7 @@ services:
       # Solo deberías incluir MYSQL_HOST o MYSQL_PASSWORD si necesitas valores distintos al base
       # que esta en docker-compose o si quieres que vengan del .env de producción. Si no cambian, no los pongas aquí.
       - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
       - "9091:9091"
 

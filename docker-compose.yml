@@ -8,10 +8,10 @@ services:
       dockerfile: OrdersService.API/Dockerfile
     environment:
       - MONGODB_HOST=${MONGODB_HOST}
-      - MONGODB_PORT=27017
-      - MONGODB_DATABASE=OrdersDatabase
-      - UsersMicroserviceName=users-microservice
-      - UsersMicroservicePort=5001
+      - MONGODB_PORT=${MONGODB_PORT}
+      - MONGODB_DATABASE=${MONGODB_DATABASE}
+      - USERSMICROSERVICENAME=${USERSMICROSERVICENAME}
+      - USERSMICROSERVICEPORT=${USERSERVICE_PORT}
     ports:
       - "8081:8081"
     networks:
@@ -39,7 +39,10 @@ services:
       dockerfile: ProductsService.API/Dockerfile
     environment:
       MYSQL_HOST: ${MYSQL_HOST}
-      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSLQ_PORT: ${MYSQL_PORT}
     ports:
       - "${PRODUCTSERVICE_PORT}:${PRODUCTSERVICE_PORT}"
     networks:
@@ -53,7 +56,7 @@ services:
     container_name: mysql-container
     image: mysql:8.3.0
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-MyStrongPassword}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -61,8 +64,6 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d
     networks:
       - products-mysql-network
-    hostname: mysql-host-productsmicroservice
-
 
 
   users-microservice:
