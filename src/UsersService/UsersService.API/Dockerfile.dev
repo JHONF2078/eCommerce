@@ -21,6 +21,6 @@ WORKDIR /src/UsersService/UsersService.API
 # Esto usa sh para poder interpolar la variable del entorno dentro del comando. Si no usas sh, las variables no se expanden dentro del ENTRYPOINT
 # ENTRYPOINT ["sh", "-c", "dotnet watch run --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:5001"]
 # El flag --no-launch-profile asegura que dotnet watch no intente cargar el perfil de launchSettings.json.
-# Esto es importante porque desde el contenedor no tenemos acceso a los perfiles de lanzamiento que tenemos en nuestra máquina local.
+# Esto es importante porque desde el contenedor no tenemos acceso a los perfiles de lanzamiento que tenemos en nuestra mï¿½quina local.
 # se hace asi para evitar cargar datos de launchsettings y cargar lo que realmente vienen dedsde docker
-ENTRYPOINT ["sh", "-c", "dotnet watch run --no-launch-profile --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:8081"]
+ENTRYPOINT ["sh", "-c", "dotnet watch run --no-launch-profile --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:5001"]

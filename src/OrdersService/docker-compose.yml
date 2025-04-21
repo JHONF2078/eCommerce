@@ -1,0 +1,106 @@
+services:
+  ordersservice.api:
+    image: ordersserviceapi
+    build:
+      context: .
+      dockerfile: OrdersService.API/Dockerfile
+    environment: 
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      MONGODB_HOST: ${MONGODB_HOST}
+      MONGODB_PORT: ${MONGODB_PORT}
+      MONGODB_DATABASE: ${MONGODB_DATABASE}
+      USERSMICROSERVICENAME: ${USERSMICROSERVICENAME}
+      USERSMICROSERVICEPORT: ${USERSMICROSERVICEPORT}
+    ports:
+      - "7000:${ASPNETCORE_HTTP_PORTS}"
+    networks:
+      - orders-mongodb-network
+   
+
+  mongodb-container:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ../../mongodb-init:/docker-entrypoint-initdb.d
+    networks:
+      - orders-mongodb-network
+    
+
+  products-microservice:
+    #image: products-microservice:latest
+    build:
+      context: ../ProductsService
+      dockerfile: ProductsService.API/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: ${ASPNETCORE_HTTP_PORTS}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "6000:${ASPNETCORE_HTTP_PORTS}"
+    networks:
+      - products-mysql-network
+      - ecommerce-network
+    depends_on:
+      - mysql-container
+  
+
+  mysql-container:
+    image: mysql:8.0
+    environment:
+     - MYSQL_ROOT_PASSWORD=admin
+    ports:
+      - "3307:3306"
+    volumes:
+      - ../../mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - products-mysql-network
+
+  users-microservice:
+    #image: users-microservice:latest
+    build:
+      context: ../UsersService
+      dockerfile: UsersService.API/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: ${ASPNETCORE_HTTP_PORTS}
+      ASPNETCORE_HTTP_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DATABASE: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+       - "5000:${ASPNETCORE_HTTP_PORTS}"
+    networks:
+      - users-postgres-network
+      - ecommerce-network
+    depends_on:
+      - postgres-container
+
+
+  postgres-container:
+     image: postgres:16.1
+     environment:
+       POSTGRES_USER: ${POSTGRES_USER}
+       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+       POSTGRES_DB: ${POSTGRES_DATABASE}
+     ports:
+       - "5433:${POSTGRES_PORT}"
+     volumes:
+        - ../../postgres-init:/docker-entrypoint-initdb.d
+     networks:
+       - users-postgres-network
+
+networks:
+  orders-mongodb-network:
+    driver: bridge
+  products-mysql-network:
+    driver: bridge
+  users-postgres-network:
+    driver: bridge
+  ecommerce-network:
+    driver: bridge
