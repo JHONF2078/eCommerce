@@ -9,7 +9,9 @@
         "MONGODB_PORT": "27018",
         "MONGODB_DATABASE": "OrdersDatabase",
         "USERSMICROSERVICENAME": "localhost",
-        "USERSMICROSERVICEPORT": "5001"
+        "USERSMICROSERVICEPORT": "9090",
+        "PRODUCTSMICROSERVICENAME": "localhost",
+        "PRODUCTSMICROSERVICEPORT": "8080"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:8081"

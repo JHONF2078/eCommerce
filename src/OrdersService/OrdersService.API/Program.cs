@@ -40,6 +40,13 @@ builder.Services.AddHttpClient<UsersMicroserviceClient>(client =>
         $"{builder.Configuration["USERSMICROSERVICEPORT"]}");
 });
 
+builder.Services.AddHttpClient<ProductsMicroserviceClient>(client => {
+    client.BaseAddress = new Uri($"http://" +
+        $"{builder.Configuration["PRODUCTSMICROSERVICENAME"]}:" +
+        $"{builder.Configuration["PRODUCTSMICROSERVICEPORT"]}");
+});
+
+
 //foreach (var kvp in builder.Configuration.AsEnumerable())
 //{
 //    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
@@ -59,7 +66,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 //AUTH
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

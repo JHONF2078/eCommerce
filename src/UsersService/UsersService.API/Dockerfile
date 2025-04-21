@@ -1,7 +1,10 @@
 ﻿# Etapa base
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
 WORKDIR /app
-EXPOSE 5001
+EXPOSE 9090
+EXPOSE 9091
+
 
 # Etapa de build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build

@@ -1,6 +1,7 @@
 services:
   ordersservice.api:
-    image: ordersserviceapi
+    container_name: orders-microservice
+    image: ordersmicroserviceapi
     build:
       context: .
       dockerfile: OrdersService.API/Dockerfile
@@ -11,13 +12,19 @@ services:
       MONGODB_DATABASE: ${MONGODB_DATABASE}
       USERSMICROSERVICENAME: ${USERSMICROSERVICENAME}
       USERSMICROSERVICEPORT: ${USERSMICROSERVICEPORT}
+      PRODUCTSMICROSERVICENAME: ${PRODUCTSMICROSERVICENAME}
+      PRODUCTSMICROSERVICEPORT: ${PRODUCTSMICROSERVICEPORT}
     ports:
       - "7000:${ASPNETCORE_HTTP_PORTS}"
     networks:
       - orders-mongodb-network
+      - ecommerce-network
+    depends_on:
+      - mongodb-container
    
 
   mongodb-container:
+    container_name: mongo-container
     image: mongo:latest
     ports:
       - "27017:27017"
@@ -28,7 +35,8 @@ services:
     
 
   products-microservice:
-    #image: products-microservice:latest
+    container_name: products-microservice
+    image: products-microservice:latest
     build:
       context: ../ProductsService
       dockerfile: ProductsService.API/Dockerfile
@@ -50,7 +58,8 @@ services:
   
 
   mysql-container:
-    image: mysql:8.0
+    container_name: mysql-container
+    image: mysql:8.3.0
     environment:
      - MYSQL_ROOT_PASSWORD=admin
     ports:
@@ -61,7 +70,8 @@ services:
       - products-mysql-network
 
   users-microservice:
-    #image: users-microservice:latest
+    container_name: users-microservice
+    image: users-microservice:latest
     build:
       context: ../UsersService
       dockerfile: UsersService.API/Dockerfile
@@ -74,7 +84,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-       - "5000:${ASPNETCORE_HTTP_PORTS}"
+       - "5000:${USERSASPNETCORE_HTTP_PORTS}"
     networks:
       - users-postgres-network
       - ecommerce-network
@@ -83,6 +93,7 @@ services:
 
 
   postgres-container:
+     container_name: postgres-container
      image: postgres:16.1
      environment:
        POSTGRES_USER: ${POSTGRES_USER}
