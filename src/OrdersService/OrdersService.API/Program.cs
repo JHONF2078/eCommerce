@@ -6,7 +6,6 @@ using OrdersMicroservice.BusinessLogicLayer.HttpClients;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 //Add DAL and BLL services
 builder.Services.AddDataAccessLayer(builder.Configuration);
 builder.Services.AddBusinessLogicLayer(builder.Configuration);
@@ -40,6 +39,11 @@ builder.Services.AddHttpClient<UsersMicroserviceClient>(client =>
         $"{builder.Configuration["USERSMICROSERVICENAME"]}:" +
         $"{builder.Configuration["USERSMICROSERVICEPORT"]}");
 });
+
+//foreach (var kvp in builder.Configuration.AsEnumerable())
+//{
+//    Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value}");
+//}
 
 var app = builder.Build();
 

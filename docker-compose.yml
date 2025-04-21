@@ -2,18 +2,22 @@
 services:
   orders-microservice:
     container_name: orders-microservice
-    image: orders-microservice
     build:
       context: ./src/OrdersService
       dockerfile: OrdersService.API/Dockerfile
     environment:
-      - MONGODB_HOST=${MONGODB_HOST}
-      - MONGODB_PORT=${MONGODB_PORT}
-      - MONGODB_DATABASE=${MONGODB_DATABASE}
-      - USERSMICROSERVICENAME=${USERSMICROSERVICENAME}
-      - USERSMICROSERVICEPORT=${USERSERVICE_PORT}
+      # deshabilitar DOTNET_LAUNCH_PROFILE en tu archivo docker-compose.override.yml:
+      # y colocar el flag  --no-launch-profile, en el dockerfile de tu microservicio
+      # para evitar que se use el launchSettings.json de tu proyecto
+      DOTNET_LAUNCH_PROFILE: ""
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      MONGODB_HOST: ${MONGODB_HOST}
+      MONGODB_PORT: ${MONGODB_PORT}
+      MONGODB_DATABASE: ${MONGODB_DATABASE}
+      USERSMICROSERVICENAME: ${USERSMICROSERVICENAME}
+      USERSMICROSERVICEPORT: ${USERSERVICE_PORT}
     ports:
-      - "8081:8081"
+      - "${ORDERSSERVICE_PORT}:${ORDERSSERVICE_PORT}"
     networks:
       - orders-mongodb-network
       - ecommerce-network
@@ -72,9 +76,9 @@ services:
       context: ./src/UsersService
       dockerfile: UsersService.API/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - ConnectionStrings__PostgresConnection=${CONNECTIONSTRING_USERS}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ConnectionStrings__PostgresConnection: ${CONNECTIONSTRING_USERS}
     ports:
       - "${USERSERVICE_PORT}:${USERSERVICE_PORT}"
     networks:
@@ -89,11 +93,11 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DATABASE}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d/

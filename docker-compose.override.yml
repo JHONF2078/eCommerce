@@ -12,11 +12,12 @@ services:
       context: ./src/OrdersService
       dockerfile: OrdersService.API/Dockerfile.dev
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
-      - ASPNETCORE_HTTP_PORTS=8081
-      - "8081"
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_HTTP_PORTS: 8081
     volumes:
       -  ./src/OrdersService:/src/OrdersService
+    ports:
+      - "${ORDERSSERVICE_PORT}:${ORDERSSERVICE_PORT}"
 
 
   products-microservice:
@@ -24,12 +25,12 @@ services:
       context: ./src/ProductsService
       dockerfile: ProductsService.API/Dockerfile.dev
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      DOTNET_CONFIGURATION: ${DOTNET_CONFIGURATION}
       # Solo deberías incluir MYSQL_HOST o MYSQL_PASSWORD si necesitas valores distintos al base
       # que esta en docker-compose o si en desarrollo los sobreescribes. Si no cambian, no los pongas aquí.
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
     #Eso significa que todo el contenido de src/ProductsService de tu máquina host
     #se monta dentro del contenedor en /app
@@ -43,10 +44,10 @@ services:
       context: ./src/UsersService
       dockerfile: UsersService.API/Dockerfile.dev
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - DOTNET_CONFIGURATION=${DOTNET_CONFIGURATION}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - ConnectionStrings__PostgresConnection=${CONNECTIONSTRING_USERS}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      DOTNET_CONFIGURATION: ${DOTNET_CONFIGURATION}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ConnectionStrings__PostgresConnection: ${CONNECTIONSTRING_USERS}
     volumes:
     #Eso significa que todo el contenido de src/UsersService de tu máquina host
     #se monta dentro del contenedor en /app

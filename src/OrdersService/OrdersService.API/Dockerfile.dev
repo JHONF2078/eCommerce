@@ -1,10 +1,30 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
 WORKDIR /src/OrdersService
 
-# Copia todos los proyectos (puedes usar patrones si lo prefieres)
-COPY . .
+# No COPY: el codigo se monta con volumen
+# COPY . . significa Toma los archivos de mi m�quina y colocalos dentro del contenedor
+# Pero en desarrollo no es necesario ni conveniente
+# En desarrollo, ya tenemos este volumen en tu docker-compose.override.yml
+#  volumes:    - ./src/OrdersService:/src/OrdersService
+# En vez de copiar el codigo, monto la carpeta ./src/OrdersService de mi maquina 
+# directamente dentro del contenedor en /src/OrdersService.
+# entonces Todo lo que edit�s en tu maquina se refleja en tiempo real dentro del contenedor
+# Y dotnet watch lo ve y recarga la app autom�ticamente.
+# Ya no necesitamos el COPY . . en el Dockerfile
+# Beneficio de evitar COPY   Hot reload, Build mas rapido, Menos errores de sincronizacion ya que
+# No hay que rebuildear si cambios algo en tu maquina
+# COPY . .
+
+
 
 WORKDIR /src/OrdersService/OrdersService.API
+
 # Usa el valor de la variable DOTNET_CONFIGURATION o "Debug" por defecto
 # Esto usa sh para poder interpolar la variable del entorno dentro del comando. Si no usas sh, las variables no se expanden dentro del ENTRYPOINT
-ENTRYPOINT ["sh", "-c", "dotnet watch run --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:8081"]
+# ENTRYPOINT ["sh", "-c", "dotnet watch run --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:8081"]
+# El flag --no-launch-profile asegura que dotnet watch no intente cargar el perfil de launchSettings.json.
+# Esto es importante porque desde el contenedor no tenemos acceso a los perfiles de lanzamiento que tenemos en nuestra máquina local.
+# se hace asi para evitar cargar datos de launchsettings y cargar lo que realmente vienen dedsde docker
+ENTRYPOINT ["sh", "-c", "dotnet watch run --no-launch-profile --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:8081"]
+
+

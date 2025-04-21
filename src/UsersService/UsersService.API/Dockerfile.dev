@@ -1,10 +1,26 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
 WORKDIR /src/UsersService
 
-# Copia todos los proyectos (puedes usar patrones si lo prefieres)
-COPY . .
+# No COPY: el codigo se monta con volumen
+# COPY . . significa Toma los archivos de mi maquina y colacalos dentro del contenedor
+# Pero en desarrollo no es necesario ni conveniente
+# En desarrollo, ya tenemos este volumen en tu docker-compose.override.yml
+#  volumes:    - ./src/UsersService:/src/UsersService
+# En vez de copiar el codigo, monto la carpeta ./src/UsersService de mi maquina 
+# directamente dentro del contenedor en /src/UsersService.
+# entonces Todo lo que editas en tu maquina se refleja en tiempo real dentro del contenedor
+# Y dotnet watch lo ve y recarga la app automaticamente.
+# Ya no necesitamos el COPY . . en el Dockerfile
+# Beneficio de evitar COPY   Hot reload, Build mas rapido, Menos errores de sincronizacion ya que
+# No hay que rebuildear si cambios algo en tu maquina
+# COPY . .
 
 WORKDIR /src/UsersService/UsersService.API
+
 # Usa el valor de la variable DOTNET_CONFIGURATION o "Debug" por defecto
 # Esto usa sh para poder interpolar la variable del entorno dentro del comando. Si no usas sh, las variables no se expanden dentro del ENTRYPOINT
-ENTRYPOINT ["sh", "-c", "dotnet watch run --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:5001"]
+# ENTRYPOINT ["sh", "-c", "dotnet watch run --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:5001"]
+# El flag --no-launch-profile asegura que dotnet watch no intente cargar el perfil de launchSettings.json.
+# Esto es importante porque desde el contenedor no tenemos acceso a los perfiles de lanzamiento que tenemos en nuestra máquina local.
+# se hace asi para evitar cargar datos de launchsettings y cargar lo que realmente vienen dedsde docker
+ENTRYPOINT ["sh", "-c", "dotnet watch run --no-launch-profile --configuration ${DOTNET_CONFIGURATION:-Debug} --urls=http://0.0.0.0:8081"]

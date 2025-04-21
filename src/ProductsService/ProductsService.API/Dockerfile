@@ -1,28 +1,96 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
+﻿# Etapa base
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
 WORKDIR /app
 EXPOSE 9091
-#EXPOSE 8081
 
-
-# This stage is used to build the service project
+# Etapa de build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src/ProductsService
+WORKDIR /src
 
-COPY . .
 
-WORKDIR "/src/ProductsService/ProductsService.API"
-RUN dotnet restore
+################# INICIA ETAPA DE BUILD O DESARROLLO   ###################
 
-# This stage is used to publish the service project to be copied to the final stage
+# En esta etapa se ejecutan desde src:
+# dotnet restore
+# dotnet build
+# dotnet publish -o /app/publish
+
+# Copiar solo los archivos del proyecto (mucho mas ordenado)
+COPY ProductsService.API/ProductsService.API.csproj ./ProductsService.API/
+COPY DataAccessLayer/DataAccessLayer.csproj ./DataAccessLayer/
+COPY BusinessLogicLayer/BusinessLogicLayer.csproj ./BusinessLogicLayer.Domain/
+
+# Restaurar dependencias
+RUN dotnet restore ./ProductsService.API/ProductsService.API.csproj
+
+# Copiar el resto del codigo fuente
+COPY ProductsService.API/ ./ProductsService.API/
+COPY DataAccessLayer/ ./DataAccessLayer/
+COPY BusinessLogicLayer/ ./BusinessLogicLayer/
+
+# Aqui es donde copias los archivos y compilas
+
+#/src
+#├── ProductsService.API/
+#│   ├── ProductsService.API.csproj
+#│   ├── Controllers/
+#│   ├── Program.cs
+#│   └── appsettings.json
+#├── ProductsService.Application/
+#│   └── ProductsService.Application.csproj
+#├── ProductsService.Domain/
+#│   └── ProductsService.Domain.csproj
+#├── ProductsService.Infrastructure/
+#│   └── ProductsService.Infrastructure.csproj
+#
+
+
+# Build
+WORKDIR /src/ProductsService.API
+RUN dotnet build -c Release -o /app/build
+
+# Publicar
 FROM build AS publish
 RUN dotnet publish -c Release -o /app/publish
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+#Esto es lo que se genera como salida despues del dotnet publish. Es lo que va a la imagen final:
+
+#/app/publish
+#├── ProductsService.API.dll
+#├── ProductsService.Application.dll
+#├── ProductsService.Domain.dll
+#├── ProductsService.Infrastructure.dll
+#├── appsettings.json
+#├── web.config (si aplica)
+#└── ...otros archivos necesarios para ejecución
+
+
+
+################# FINALIZAR DE BUILD O DESARROLLO   ###################
+
+
+
+# Imagen final
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "ProductsService.API.dll"]
+
+
+# El contenido se ve asi en el contenedor final
+
+#
+#/app
+#├── ProductsService.API.dll
+#├── ProductsService.Application.dll
+#├── ProductsService.Domain.dll
+#├── ProductsService.Infrastructure.dll
+#├── appsettings.json
+#└── ...
+
+
+#Etapa:       Carpeta:       Contenido:
+#------------ -------------  ---------------------------------------------
+#build        /src           Código fuente (proyectos .csproj, .cs, etc.)
+#publish      /app/publish   Archivos compilados listos para ejecución
+#final        /app           Copia de /app/publish → ejecutable

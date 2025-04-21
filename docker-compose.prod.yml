@@ -20,7 +20,7 @@ services:
       #Solo si tu app NO escucha correctamente en desarrollo (por ejemplo, si ves que no responde en localhost:9091, etc.).
       - ASPNETCORE_URLS=http://+:8081
     ports:
-      - "8081:8081"
+      - "${ORDERSERVICE_PORT}:${ORDERSERVICE_PORT}"
 
 
   products-microservice:
