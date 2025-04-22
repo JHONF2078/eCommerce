@@ -21,12 +21,16 @@ public class UsersController : ControllerBase
   [HttpGet("{userID}")]
   public async Task<IActionResult> GetUserByUserID(Guid userID)
   {
+    await Task.Delay(1000); // Simulate some delay
+    throw new NotImplementedException("This method is not implemented yet.");
+
+
     if (userID == Guid.Empty)
     {
       return BadRequest("Invalid User ID");
     }
 
-   UserDTO? response = await _usersService.GetUserByUserID(userID);
+    UserDTO? response = await _usersService.GetUserByUserID(userID);
 
     if (response == null)
     {

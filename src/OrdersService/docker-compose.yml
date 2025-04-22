@@ -15,7 +15,7 @@ services:
       PRODUCTSMICROSERVICENAME: ${PRODUCTSMICROSERVICENAME}
       PRODUCTSMICROSERVICEPORT: ${PRODUCTSMICROSERVICEPORT}
     ports:
-      - "7000:${ASPNETCORE_HTTP_PORTS}"
+      - "7001:${ASPNETCORE_HTTP_PORTS}"
     networks:
       - orders-mongodb-network
       - ecommerce-network
@@ -49,7 +49,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "6000:${ASPNETCORE_HTTP_PORTS}"
+      - "6001:${ASPNETCORE_HTTP_PORTS}"
     networks:
       - products-mysql-network
       - ecommerce-network

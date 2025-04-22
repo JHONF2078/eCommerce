@@ -12,7 +12,6 @@ public class UsersMicroserviceClient
     _httpClient = httpClient;
   }
 
-
   public async Task<UserDTO?> GetUserByUserID(Guid userID)
   {
     HttpResponseMessage response = await _httpClient.GetAsync($"/api/users/{userID}");
@@ -29,10 +28,16 @@ public class UsersMicroserviceClient
       }
       else
       {
-        throw new HttpRequestException($"Http request failed with status code {response.StatusCode}");
-      }
-    }
+                //throw new HttpRequestException($"Http request failed with status code {response.StatusCode}");
 
+                return new UserDTO(
+                    PersonName: "Temporaly Unavailable",
+                    Email: "Temporaly Unavailable",
+                    Gender: "Temporaly Unavailable",
+                    UserID: Guid.Empty
+                );
+            }
+    }
 
     UserDTO? user = await response.Content.ReadFromJsonAsync<UserDTO>();
 

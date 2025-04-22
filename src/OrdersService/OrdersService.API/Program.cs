@@ -3,6 +3,9 @@ using OrdersService.BusinessLogicLayer;
 using FluentValidation.AspNetCore;
 using OrdersService.API.Middleware;
 using OrdersMicroservice.BusinessLogicLayer.HttpClients;
+using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using OrdersService.BusinessLogicLayer.Policies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,13 +35,30 @@ builder.Services.AddCors(options =>
         });
 });
 
+
+//add policies
+builder.Services.AddTransient<IUsersMicroservicePolices, UsersMicroservicePolicies>();
+
+
 //to comunication with other microservices
 builder.Services.AddHttpClient<UsersMicroserviceClient>(client =>
 {
     client.BaseAddress = new Uri($"http://" +
         $"{builder.Configuration["USERSMICROSERVICENAME"]}:" +
         $"{builder.Configuration["USERSMICROSERVICEPORT"]}");
-});
+}).AddPolicyHandler(
+    builder.Services.BuildServiceProvider()
+    .GetRequiredService<IUsersMicroservicePolices>()
+    .GetRetryPolicy()
+)
+.AddPolicyHandler(
+    builder.Services.BuildServiceProvider()
+    .GetRequiredService<IUsersMicroservicePolices>()
+    .GetCircuitBreakerPolicy()
+ );
+
+
+
 
 builder.Services.AddHttpClient<ProductsMicroserviceClient>(client => {
     client.BaseAddress = new Uri($"http://" +
