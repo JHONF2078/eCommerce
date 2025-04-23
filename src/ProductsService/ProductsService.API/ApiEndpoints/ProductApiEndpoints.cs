@@ -23,8 +23,8 @@ public static class ProductAPIEndpoints
         ProductResponse, ProductAddRequest, ProductUpdateRequest >  productsService, Guid ProductID) =>
     {
 
-        await Task.Delay(1000); // Simulate some delay
-        throw new NotImplementedException("Not implemented yet");
+        //await Task.Delay(1000); // Simulate some delay
+        //throw new NotImplementedException("Not implemented yet");
 
         ProductResponse? product = await productsService.GetSingleByCondition(temp => temp.Id == ProductID);
         if (product == null)

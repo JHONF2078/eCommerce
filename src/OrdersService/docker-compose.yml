@@ -14,6 +14,8 @@ services:
       USERSMICROSERVICEPORT: ${USERSMICROSERVICEPORT}
       PRODUCTSMICROSERVICENAME: ${PRODUCTSMICROSERVICENAME}
       PRODUCTSMICROSERVICEPORT: ${PRODUCTSMICROSERVICEPORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
     ports:
       - "7001:${ASPNETCORE_HTTP_PORTS}"
     networks:
@@ -105,6 +107,16 @@ services:
         - ../../postgres-init:/docker-entrypoint-initdb.d
      networks:
        - users-postgres-network
+
+
+  redis-container:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - E:\projects\microservices\eCommerce:/data
+    networks:
+      - ecommerce-network
 
 networks:
   orders-mongodb-network:

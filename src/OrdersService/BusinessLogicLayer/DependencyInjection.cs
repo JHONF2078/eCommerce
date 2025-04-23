@@ -6,7 +6,6 @@ using OrdersService.BusinessLogicLayer.ServiceContracts;
 using OrdersService.BusinessLogicLayer.Services;
 using OrdersService.BusinessLogicLayer.Validators;
 
-
 namespace OrdersService.BusinessLogicLayer
 {
     public static class DependencyInjection
@@ -20,6 +19,10 @@ namespace OrdersService.BusinessLogicLayer
             services.AddAutoMapper(typeof(OrderAddRequestToOrderMappingProfile).Assembly);
 
             services.AddScoped<IOrdersService, OrderssService>();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = $"{configuration["REDIS_HOST"]}:{configuration["REDIS_PORT"]}";
+            });
 
             return services;
         }
