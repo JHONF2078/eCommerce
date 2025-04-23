@@ -21,8 +21,8 @@ public class UsersController : ControllerBase
   [HttpGet("{userID}")]
   public async Task<IActionResult> GetUserByUserID(Guid userID)
   {
-    await Task.Delay(1000); // Simulate some delay
-    throw new NotImplementedException("This method is not implemented yet.");
+    await Task.Delay(10000); // Simulate some delay
+    //throw new NotImplementedException("This method is not implemented yet.");
 
 
     if (userID == Guid.Empty)

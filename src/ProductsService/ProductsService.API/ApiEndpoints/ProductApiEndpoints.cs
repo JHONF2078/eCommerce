@@ -19,9 +19,14 @@ public static class ProductAPIEndpoints
 
 
         //GET /api/products/search/product-id/00000000-0000-0000-0000-000000000000
-    app.MapGet("/api/products/search/product-id/{ProductID:guid}", async (IGenericService < Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest >  productsService, Guid ProductID) =>
+    app.MapGet("/api/products/search/product-id/{ProductID:guid}", async (IGenericService < Product, Guid, 
+        ProductResponse, ProductAddRequest, ProductUpdateRequest >  productsService, Guid ProductID) =>
     {
-      ProductResponse? product = await productsService.GetSingleByCondition(temp => temp.Id == ProductID);
+
+        await Task.Delay(1000); // Simulate some delay
+        throw new NotImplementedException("Not implemented yet");
+
+        ProductResponse? product = await productsService.GetSingleByCondition(temp => temp.Id == ProductID);
         if (product == null)
             return Results.NotFound();
 

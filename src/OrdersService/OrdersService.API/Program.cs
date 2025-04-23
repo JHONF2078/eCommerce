@@ -37,7 +37,9 @@ builder.Services.AddCors(options =>
 
 
 //add policies
-builder.Services.AddTransient<IUsersMicroservicePolices, UsersMicroservicePolicies>();
+builder.Services.AddTransient<IUsersMicroservicePolicies, UsersMicroservicePolicies>();
+builder.Services.AddTransient<IProductsMicroservicePolicies, ProductsMicroservicePolicies>();
+builder.Services.AddTransient<IPollyPolicies, PollyPolicies>();
 
 
 //to comunication with other microservices
@@ -46,17 +48,24 @@ builder.Services.AddHttpClient<UsersMicroserviceClient>(client =>
     client.BaseAddress = new Uri($"http://" +
         $"{builder.Configuration["USERSMICROSERVICENAME"]}:" +
         $"{builder.Configuration["USERSMICROSERVICEPORT"]}");
-}).AddPolicyHandler(
-    builder.Services.BuildServiceProvider()
-    .GetRequiredService<IUsersMicroservicePolices>()
-    .GetRetryPolicy()
-)
+})
+//.AddPolicyHandler(
+//    builder.Services.BuildServiceProvider()
+//    .GetRequiredService<IUsersMicroservicePolicies>()
+//    .GetRetryPolicy()
+//)
+//.AddPolicyHandler(
+//    builder.Services.BuildServiceProvider()
+//    .GetRequiredService<IUsersMicroservicePolicies>()
+//    .GetCircuitBreakerPolicy()
+// )
+// .AddPolicyHandler(
+//   builder.Services.BuildServiceProvider()
+//   .GetRequiredService<IUsersMicroservicePolicies>().GetTimeoutPolicy()
+// );
 .AddPolicyHandler(
-    builder.Services.BuildServiceProvider()
-    .GetRequiredService<IUsersMicroservicePolices>()
-    .GetCircuitBreakerPolicy()
- );
-
+    builder.Services.BuildServiceProvider().GetRequiredService<IUsersMicroservicePolicies>().GetCombinedPolicy()
+);
 
 
 
@@ -64,7 +73,13 @@ builder.Services.AddHttpClient<ProductsMicroserviceClient>(client => {
     client.BaseAddress = new Uri($"http://" +
         $"{builder.Configuration["PRODUCTSMICROSERVICENAME"]}:" +
         $"{builder.Configuration["PRODUCTSMICROSERVICEPORT"]}");
-});
+})
+.AddPolicyHandler(
+   builder.Services.BuildServiceProvider().GetRequiredService<IProductsMicroservicePolicies>().GetFallbackPolicy()
+ )
+.AddPolicyHandler(
+    builder.Services.BuildServiceProvider().GetRequiredService<IProductsMicroservicePolicies>().GetBulkheadIsolationPolicy()
+);
 
 
 //foreach (var kvp in builder.Configuration.AsEnumerable())
