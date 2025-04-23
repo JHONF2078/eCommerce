@@ -33,13 +33,13 @@ public ProductsMicroserviceClient(HttpClient httpClient,
             string cacheKey = $"product:{productID}";
             string? cachedProduct = await _distributedCache.GetStringAsync(cacheKey);
 
-            HttpResponseMessage response = await _httpClient.GetAsync($"/api/products/search/product-id/{productID}");
-
             if (cachedProduct != null)
             {
                 ProductDTO? productFromCache = JsonSerializer.Deserialize<ProductDTO>(cachedProduct);
                 return productFromCache;
             }
+
+            HttpResponseMessage response = await _httpClient.GetAsync($"/gateway/products/search/product-id/{productID}");
 
             if (!response.IsSuccessStatusCode)
             {

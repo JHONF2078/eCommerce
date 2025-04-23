@@ -10,10 +10,10 @@ services:
       MONGODB_HOST: ${MONGODB_HOST}
       MONGODB_PORT: ${MONGODB_PORT}
       MONGODB_DATABASE: ${MONGODB_DATABASE}
-      USERSMICROSERVICENAME: ${USERSMICROSERVICENAME}
-      USERSMICROSERVICEPORT: ${USERSMICROSERVICEPORT}
-      PRODUCTSMICROSERVICENAME: ${PRODUCTSMICROSERVICENAME}
-      PRODUCTSMICROSERVICEPORT: ${PRODUCTSMICROSERVICEPORT}
+      USERSMICROSERVICENAME: ${APIGATEWAY_HOST}
+      USERSMICROSERVICEPORT: ${ASPNETCORE_HTTP_PORTS}
+      PRODUCTSMICROSERVICENAME: ${APIGATEWAY_HOST}
+      PRODUCTSMICROSERVICEPORT: ${ASPNETCORE_HTTP_PORTS}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
     ports:
@@ -117,6 +117,18 @@ services:
       - E:\projects\microservices\eCommerce:/data
     networks:
       - ecommerce-network
+
+    
+  apigateway-container:
+    image: apigateway
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    ports:
+      - "4000:8080"
+    networks:
+      - ecommerce-network
+
 
 networks:
   orders-mongodb-network:
