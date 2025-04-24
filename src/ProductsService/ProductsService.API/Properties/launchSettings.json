@@ -7,10 +7,15 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "MYSQL_HOST": "localhost",
-        "MYSQL_PORT": "3306",
+        "MYSQL_PORT": "3307",
         "MYSQL_DATABASE": "ecommerceproductsdatabase",
         "MYSQL_USER": "root",
-        "MYSQL_PASSWORD": "admin"
+        "MYSQL_PASSWORD": "admin",
+        "RABBITMQ_HOSTNAME": "localhost",
+        "RABBITMQ_USERNAME": "user",
+        "RABBITMQ_PASSWORD": "password",
+        "RABBITMQ_PORT": "5672",
+        "RABBITMQ_PRODUCTS_EXCHANGE": "product.exchange"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:9091",

@@ -16,6 +16,11 @@ services:
       PRODUCTSMICROSERVICEPORT: ${ASPNETCORE_HTTP_PORTS}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      RABBITMQ_HOSTNAME: ${RABBITMQ_HOSTNAME}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT:  ${RABBITMQ_PORT}
+      RABBITMQ_PRODUCTS_EXCHANGE: ${RABBITMQ_PRODUCTS_EXCHANGE}
     ports:
       - "7001:${ASPNETCORE_HTTP_PORTS}"
     networks:
@@ -50,6 +55,11 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      RABBITMQ_HOSTNAME: ${RABBITMQ_HOSTNAME}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_PRODUCTS_EXCHANGE: ${RABBITMQ_PRODUCTS_EXCHANGE}
     ports:
       - "6001:${ASPNETCORE_HTTP_PORTS}"
     networks:
@@ -128,6 +138,18 @@ services:
       - "4000:8080"
     networks:
       - ecommerce-network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672" # RabbitMQ default port
+      - "15672:15672" # RabbitMQ management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=user # Default rabbit  username  is guest
+      - RABBITMQ_DEFAULT_PASS=password # Default rabbit password is guest
+    networks:
+      - ecommerce-network
+    
 
 
 networks:

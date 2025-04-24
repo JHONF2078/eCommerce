@@ -1,12 +1,10 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using ProductsService.BusinessLogicLayer.Mappers;
-using ProductsService.BusinessLogicLayer.Validators;
+using ProductsService.BusinessLogicLayer.RabbitMQ;
 using ProductsService.BusinessLogicLayer.ServiceContracts;
 using ProductsService.BusinessLogicLayer.Services;
-using ProductsService.BusinessLogicLayer.DTO;
-using ProductsService.DataAccessLayer.Entities;
-using System.Security.Cryptography;
+using ProductsService.BusinessLogicLayer.Validators;
 
 namespace ProductsService.BusinessLogicLayer
 {
@@ -24,10 +22,11 @@ namespace ProductsService.BusinessLogicLayer
             services.AddValidatorsFromAssemblyContaining<ProductAddRequestValidator>();
 
             //services.AddScoped(typeof(IGenericService<,,,>), typeof(GenericService<,,,>));
+          
+            services.AddScoped<IProductService, ProductService>();
 
-            services.AddScoped<
-            IGenericService<Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest>,
-            GenericService<Product, Guid, ProductResponse, ProductAddRequest, ProductUpdateRequest>>();
+
+            services.AddTransient<IRabbitMQPublisher, RabbitMQPublisher>();
 
             return services;
         }

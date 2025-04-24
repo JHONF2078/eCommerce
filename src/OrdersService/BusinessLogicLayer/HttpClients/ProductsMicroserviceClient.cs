@@ -110,4 +110,3 @@ public ProductsMicroserviceClient(HttpClient httpClient,
         }
     }
 }
-

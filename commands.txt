@@ -22,3 +22,9 @@ Ve a Debug > Attach to Process.
 Selecciona "Connection Type: Docker".
 
 Conéctate al proceso en el contenedor usersservice.api.
+
+
+###########     rabbitmq    ###########
+
+#cambiar el nombre del usuario
+docker run -d --hostname my-rabbit --name some-rabbit rabbitmq:3

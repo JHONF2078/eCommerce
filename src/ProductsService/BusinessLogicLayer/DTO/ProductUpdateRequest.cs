@@ -1,4 +1,5 @@
 ﻿using ProductsService.BusinessLogicLayer.ServiceContracts;
+using ProductsService.DataAccessLayer.EntitiesContracts;
 
 namespace ProductsService.BusinessLogicLayer.DTO
 {
@@ -8,7 +9,7 @@ namespace ProductsService.BusinessLogicLayer.DTO
         CategoryOptions Category,
         double? UnitPrice, 
         int? QuantityInStock
-       ) : IRequestWithId<Guid>
+       ) : IEntity<Guid>
     {
         public Guid Id => ProductID;
         public ProductUpdateRequest() : this(default, default, default, default, default)
