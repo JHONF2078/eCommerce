@@ -71,6 +71,9 @@ namespace ProductsService.BusinessLogicLayer.RabbitMQ
             //ahora creamos el exchange (intercambio)
             string exchangeName = _configuration["RABBITMQ_PRODUCTS_EXCHANGE"]!;
 
+            Console.WriteLine($"📤 Publicando en exchange: {exchangeName}, con routingKey: {routingKey}");
+
+
             _channel.ExchangeDeclare(
                 exchange: exchangeName,
                 type: ExchangeType.Direct,

@@ -152,7 +152,7 @@ namespace ProductsService.BusinessLogicLayer.Services
             //a productUpdateRequest.ProductName simpre seria 
             //igual a existingProduct   por lo tanto ProductName siempre seria igual en los dos
             bool isProductNameChanged = productUpdateRequest.ProductName != existingProduct.ProductName;
-
+            Console.WriteLine($" nombre productUpdateRequest : {productUpdateRequest.ProductName} nombre existingProduct.ProductName {existingProduct.ProductName}");
             //Map from ProductUpdateRequest to Product product
             //Invokes ProductUpdateRequestToProductMappingProfile
             // ← NO se crea una entidad nueva           
@@ -163,6 +163,7 @@ namespace ProductsService.BusinessLogicLayer.Services
             //Publish product.update.name message to the exchange
             if (isProductNameChanged)
             {
+                Console.WriteLine($"📤 Publicando cambio de nombre: {product.ProductName}");
                 string routingKey = "product.update.name";
                 var message = new ProductNameUpdateMessage(product.Id, product.ProductName);
 

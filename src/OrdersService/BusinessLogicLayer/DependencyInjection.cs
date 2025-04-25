@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrdersService.BusinessLogicLayer.Mappers;
+using OrdersService.BusinessLogicLayer.RabbitMQ;
 using OrdersService.BusinessLogicLayer.ServiceContracts;
 using OrdersService.BusinessLogicLayer.Services;
 using OrdersService.BusinessLogicLayer.Validators;
@@ -23,6 +24,11 @@ namespace OrdersService.BusinessLogicLayer
             {
                 options.Configuration = $"{configuration["REDIS_HOST"]}:{configuration["REDIS_PORT"]}";
             });
+
+            services.AddTransient<IRabbitMQProductNameUpdateConsumer, RabbitMQProductNameUpdateConsumer>();
+
+            //Hosted service
+            services.AddHostedService<RabbitMQProductNameUpdateHostedService>();
 
             return services;
         }
