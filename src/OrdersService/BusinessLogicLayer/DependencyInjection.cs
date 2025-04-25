@@ -26,9 +26,11 @@ namespace OrdersService.BusinessLogicLayer
             });
 
             services.AddTransient<IRabbitMQProductNameUpdateConsumer, RabbitMQProductNameUpdateConsumer>();
+            services.AddTransient<IRabbitMQProductDeletionConsumer, RabbitMQProductDeletionConsumer>();
 
             //Hosted service
             services.AddHostedService<RabbitMQProductNameUpdateHostedService>();
+            services.AddHostedService<RabbitMQProductDeletionHostedService>();
 
             return services;
         }

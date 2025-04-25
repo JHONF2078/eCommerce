@@ -72,12 +72,23 @@ namespace ProductsService.BusinessLogicLayer.Services
         public async Task<bool> DeleteAsync(Guid id)
         {
             // 2.  Buscar la entidad (FindAsync → GetByIdAsync)
-            Product? existing = await _genericRepository.GetByIdAsync(id);
-            if (existing is null)
+            Product? existingProduct = await _genericRepository.GetByIdAsync(id);
+            if (existingProduct is null)
                 throw new ArgumentException("Invalid product ID");
 
             //attempt to delete product
             bool isDeleted = await _genericRepository.DeleteAsync(id);
+
+            //TO DO: Add code for posting a message to the message queue that announces the consumers about the deleted product details
+
+            //Publish message of product.delete
+            if (isDeleted)
+            {
+                ProductDeletionMessage message = new ProductDeletionMessage(existingProduct.Id, existingProduct.ProductName);
+                string routingKey = "product.delete";
+
+                _rabbitMQPublisher.Publish(routingKey, message);
+            }
 
             return isDeleted;
         }
