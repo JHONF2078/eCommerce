@@ -12,6 +12,5 @@ namespace ProductsService.DataAccessLayer.Entities
         public string Category { get; set; }
         public double? UnitPrice { get; set; }
         public int? QuantityInStock { get; set; }
-
     }
 }

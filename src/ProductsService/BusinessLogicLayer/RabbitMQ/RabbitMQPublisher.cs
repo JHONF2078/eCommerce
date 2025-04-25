@@ -52,7 +52,7 @@ namespace ProductsService.BusinessLogicLayer.RabbitMQ
             _connection.Dispose();
         }
 
-        public void Publish<T>(string routingKey, T message)
+        public void Publish<T>(Dictionary<string, object> headers, T message)
         {
             //los mensajes se publican en el exhange en el intercambio
             //los objetos no pueden ser publicados directamente en el exchange
@@ -71,14 +71,17 @@ namespace ProductsService.BusinessLogicLayer.RabbitMQ
             //ahora creamos el exchange (intercambio)
             string exchangeName = _configuration["RABBITMQ_PRODUCTS_EXCHANGE"]!;
 
-            Console.WriteLine($"📤 Publicando en exchange: {exchangeName}, con routingKey: {routingKey}");
+           // Console.WriteLine($"📤 Publicando en exchange: {exchangeName}, con routingKey: {routingKey}");
 
 
             _channel.ExchangeDeclare(
                 exchange: exchangeName,
-                type: ExchangeType.Direct,
+                type: ExchangeType.Headers,
                 durable: true
               );
+
+            var bascicProperties = _channel.CreateBasicProperties();
+            bascicProperties.Headers = headers;
 
             //ahora posteamos el mensaje al exchange
             //routingKey es la clave de enrutamiento oevento por ejemplo
@@ -88,8 +91,8 @@ namespace ProductsService.BusinessLogicLayer.RabbitMQ
             //Nota: las colas no se definen en el productor, solo en el consumidor
             _channel.BasicPublish(
                 exchange: exchangeName,
-                routingKey: routingKey,
-                basicProperties: null,
+                routingKey: string.Empty,
+                basicProperties: bascicProperties,
                 body: messageBodyInBytes
              ); 
         }

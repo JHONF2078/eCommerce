@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Amazon.Runtime.Internal.Util;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using OrdersService.BusinessLogicLayer.DTO;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -14,9 +17,13 @@ public class RabbitMQProductNameUpdateConsumer : IDisposable, IRabbitMQProductNa
   private readonly IModel _channel;
   private readonly IConnection _connection;
   private readonly ILogger<RabbitMQProductNameUpdateConsumer> _logger;
+  //para inyectar el cache distribuido
+  private readonly IDistributedCache _cache;
 
     public RabbitMQProductNameUpdateConsumer(
-        IConfiguration configuration, ILogger<RabbitMQProductNameUpdateConsumer> logger)
+        IConfiguration configuration, 
+        ILogger<RabbitMQProductNameUpdateConsumer> logger,
+        IDistributedCache cache)
     { 
         _logger = logger;
         _configuration = configuration;
@@ -48,6 +55,7 @@ public class RabbitMQProductNameUpdateConsumer : IDisposable, IRabbitMQProductNa
 
                 _connection = connectionFactory.CreateConnection();
                 _channel = _connection.CreateModel();
+                _cache = cache;
 
                 _logger.LogInformation("Conexión a RabbitMQ establecida correctamente.");
                 break;
@@ -68,36 +76,63 @@ public class RabbitMQProductNameUpdateConsumer : IDisposable, IRabbitMQProductNa
 
     public void Consume()
     {
-      string routingKey = "product.update.name";
+        var headers = new Dictionary<string, object>()
+        {
+            {"x-match", "all" }, //define si als claves deben coincidir complentamete o al menos uno (all, any)
+            { "event", "product.update" },           
+            { "RowCount", 1 }
+        };
+
+        //string routingKey = "product.update.*";
         string queueName = "orders.product.update.name.queue";
 
         //Create exchange
         string exchangeName = _configuration["RABBITMQ_PRODUCTS_EXCHANGE"]!;
-        _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Direct, durable: true);
+        _channel.ExchangeDeclare(exchange: exchangeName, type: ExchangeType.Headers, durable: true);
 
         //Create message queue
         _channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null); //x-message-ttl | x-max-length | x-expired 
 
         //Bind the message to exchange
-        _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey);
+        _channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: string.Empty, arguments: headers);
 
 
         EventingBasicConsumer consumer = new EventingBasicConsumer(_channel);
 
-        consumer.Received += (sender, args) =>
+        consumer.Received += async (sender, args) =>
         {
             byte[] body = args.Body.ToArray();
             string message = Encoding.UTF8.GetString(body);
 
             if (message != null)
             {
-                ProductNameUpdateMessage? productNameUpdateMessage = JsonSerializer.Deserialize<ProductNameUpdateMessage>(message);
+                ProductDTO? productDTO = JsonSerializer.Deserialize<ProductDTO>(message);              
 
-                _logger.LogInformation($"Product name updated: {productNameUpdateMessage.ProductID}, New name: {productNameUpdateMessage.NewName}");
-            }
+                if (productDTO != null)
+                {
+                    _logger.LogInformation($"Product name updated: {productDTO.ProductID}, New name: {productDTO.ProductName}");
+                    await HandleProductUpdation(productDTO);
+                }
+            }               
         };
 
         _channel.BasicConsume(queue: queueName, consumer: consumer, autoAck: true);
+    }
+
+
+
+    private async Task HandleProductUpdation(ProductDTO productDTO)
+    {
+        _logger.LogInformation($"Product name updated: {productDTO.ProductID}, New name: {productDTO.ProductName}");
+
+        string productJson = JsonSerializer.Serialize(productDTO);
+
+        DistributedCacheEntryOptions options = new DistributedCacheEntryOptions()
+          .SetAbsoluteExpiration(TimeSpan.FromSeconds(300));
+
+        string cacheKeyToWrite = $"product:{productDTO.ProductID}";
+
+        await _cache.SetStringAsync(cacheKeyToWrite, productJson, options);
     }
 
 

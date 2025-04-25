@@ -5,12 +5,8 @@ using ProductsService.BusinessLogicLayer.DTO;
 using ProductsService.BusinessLogicLayer.RabbitMQ;
 using ProductsService.BusinessLogicLayer.ServiceContracts;
 using ProductsService.DataAccessLayer.Entities;
-using ProductsService.DataAccessLayer.EntitiesContracts;
-using ProductsService.DataAccessLayer.Repositories;
 using ProductsService.DataAccessLayer.RepositoryContracts;
 using System.Linq.Expressions;
-using System.Threading.Channels;
-using System.Xml.Linq;
 
 namespace ProductsService.BusinessLogicLayer.Services
 {
@@ -87,7 +83,13 @@ namespace ProductsService.BusinessLogicLayer.Services
                 ProductDeletionMessage message = new ProductDeletionMessage(existingProduct.Id, existingProduct.ProductName);
                 string routingKey = "product.delete";
 
-                _rabbitMQPublisher.Publish(routingKey, message);
+                var  headers = new Dictionary<string, object>()
+                {
+                    { "event", "product.delete" },
+                    { "RowCount", 1 }
+                };
+
+                _rabbitMQPublisher.Publish(headers, message);
             }
 
             return isDeleted;
@@ -159,11 +161,12 @@ namespace ProductsService.BusinessLogicLayer.Services
 
 
             // Check if product name is changed
-            //se hace esta linea antes de maperar ya que si al maperar se copian los datos de productUpdateRequest
-            //a productUpdateRequest.ProductName simpre seria 
-            //igual a existingProduct   por lo tanto ProductName siempre seria igual en los dos
-            bool isProductNameChanged = productUpdateRequest.ProductName != existingProduct.ProductName;
-            Console.WriteLine($" nombre productUpdateRequest : {productUpdateRequest.ProductName} nombre existingProduct.ProductName {existingProduct.ProductName}");
+            //se hace esta linea antes de maperar ya que si al mapear se copian los datos de productUpdateRequest
+            //a existingProduct por lo tanto  productUpdateRequest.ProductName simpre seria a
+            //existingProduct.ProductName  por lo tanto ProductName siempre seria igual en los dos
+            // bool isProductNameChanged = productUpdateRequest.ProductName != existingProduct.ProductName;
+
+
             //Map from ProductUpdateRequest to Product product
             //Invokes ProductUpdateRequestToProductMappingProfile
             // ← NO se crea una entidad nueva           
@@ -172,14 +175,19 @@ namespace ProductsService.BusinessLogicLayer.Services
             Product? updatedProduct = await _genericRepository.UpdateAsync(product);
 
             //Publish product.update.name message to the exchange
-            if (isProductNameChanged)
-            {
-                Console.WriteLine($"📤 Publicando cambio de nombre: {product.ProductName}");
-                string routingKey = "product.update.name";
-                var message = new ProductNameUpdateMessage(product.Id, product.ProductName);
+                       
+            //string routingKey = "product.update.name";
+            //var message = new ProductNameUpdateMessage(product.Id, product.ProductName);
 
-                _rabbitMQPublisher.Publish<ProductNameUpdateMessage>(routingKey, message);
-            }                       
+            var headers = new Dictionary<string, object>()
+            {
+                { "event", "product.update" },              
+                { "RowCount", 1 }
+            };
+
+            ProductDTO productDTO = _mapper.Map<ProductDTO>(product);
+
+            _rabbitMQPublisher.Publish<ProductDTO>(headers, productDTO);                          
 
             ProductResponse? updatedproductResponse = _mapper.Map<ProductResponse>(updatedProduct);
 

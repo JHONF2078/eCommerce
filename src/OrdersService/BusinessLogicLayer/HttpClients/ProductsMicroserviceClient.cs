@@ -84,11 +84,11 @@ public ProductsMicroserviceClient(HttpClient httpClient,
 
             DistributedCacheEntryOptions options = new DistributedCacheEntryOptions()
               //el producto se borra a los  5 minutos
-              .SetAbsoluteExpiration(TimeSpan.FromSeconds(300))
+              .SetAbsoluteExpiration(TimeSpan.FromSeconds(300));
               //si nadie lo consulta en 100 segundos, se borra antes de los 5 minutos
               //si alguien lo consulta antes de los 100 segundos, el contador se reinicia
               //y vuelve a contar los 100 segundos
-              .SetSlidingExpiration(TimeSpan.FromSeconds(100));
+              //.SetSlidingExpiration(TimeSpan.FromSeconds(100));
 
             string cacheKeyToWrite = $"product:{productID}";
 

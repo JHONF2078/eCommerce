@@ -14,7 +14,7 @@ namespace ProductsService.BusinessLogicLayer.RabbitMQ
         //routingKey: una cadena que indica la clave de enrutamiento que usará
         //RabbitMQ para dirigir el mensaje al destinatario correcto.
         //message: el contenido del mensaje, de tipo T
-        void Publish<T>(string routingKey, T message);
+        void Publish<T>(Dictionary<string, object> headers, T message);
 
     }
 }
