@@ -1,5 +1,5 @@
 services:
-  ordersservice.api:
+  orders-microservice.api:
     container_name: orders-microservice
     image: ordersmicroserviceapi
     build:

@@ -5,7 +5,7 @@
       "DownstreamPathTemplate": "/api/Orders",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ordersservice.api",
+          "Host": "orders-microservice",
           "Port": 8080
         }
       ],
@@ -28,7 +28,7 @@
       "DownstreamPathTemplate": "/api/Orders/search/orderid/{orderID}",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ordersservice.api",
+          "Host": "orders-microservice",
           "Port": 8080
         }
       ],
@@ -44,7 +44,7 @@
       "DownstreamPathTemplate": "/api/Orders/search/productid/{productID}",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ordersservice.api",
+          "Host": "orders-microservice",
           "Port": 8080
         }
       ],
@@ -60,7 +60,7 @@
       "DownstreamPathTemplate": "/api/Orders/search/orderDate/{orderDate}",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ordersservice.api",
+          "Host": "orders-microservice",
           "Port": 8080
         }
       ],
@@ -76,7 +76,7 @@
       "DownstreamPathTemplate": "/api/Orders/search/userid/{userID}",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ordersservice.api",
+          "Host": "orders-microservice",
           "Port": 8080
         }
       ],
@@ -92,7 +92,7 @@
       "DownstreamPathTemplate": "/api/Orders/{orderID}",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ordersservice.api",
+          "Host": "orders-microservice",
           "Port": 8080
         }
       ],
